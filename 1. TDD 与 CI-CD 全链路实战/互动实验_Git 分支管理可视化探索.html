@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 分支流转与 TDD 模拟器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-green {
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(34, 197, 94, 0.7)); }
+            50% { filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.9)); }
+        }
+        .node-enter {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .branch-line {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const katexOptions = {
+        delimiters: [
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false,
+        strict: false,
+        trust: true
+    };
+
+    let renderTimeout;
+    function safeRender() {
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+            renderMathInElement(document.body, katexOptions);
+        }, 100);
+    }
+
+    renderMathInElement(document.body, katexOptions);
+
+    const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        mutations.forEach((mutation) => {
+            if (mutation.target &&
+                mutation.target.className &&
+                typeof mutation.target.className === 'string' &&
+                mutation.target.className.includes('katex')) {
+                return;
+            }
+            shouldRender = true;
+        });
+
+        if (shouldRender) {
+            safeRender();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    setInterval(() => {
+        const text = document.body.innerText;
+        if (text.includes('\\(') || text.includes('$$')) {
+            safeRender();
+        }
+    }, 2000);
+});
+</script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen">
+
+    <div class="max-w-5xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-slate-800 mb-2">Git 分支流转与 TDD 模型</h1>
+            <p class="text-slate-600 max-w-2xl mx-auto">
+                交互式演示代码如何在 <strong>Develop</strong> 分支进行 TDD 循环，并最终安全合并至 <strong>Master</strong> 分支。
+            </p>
+        </header>
+
+        <!-- Main Simulation Container -->
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+            
+            <!-- Git Graph Canvas Area -->
+            <div class="relative bg-slate-900 h-80 w-full overflow-hidden p-4">
+                <div class="absolute top-4 left-4 flex gap-4 text-xs font-mono">
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500"></span> Red (失败)</div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Green (通过)</div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Refactor (重构)</div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-sky-500"></span> Stable (稳定)</div>
+                </div>
+
+                <svg id="git-graph" class="w-full h-full" viewBox="0 0 800 300">
+                    <!-- Branch Guide Lines -->
+                    <line x1="50" y1="80" x2="750" y2="80" stroke="#334155" stroke-width="1" stroke-dasharray="4" />
+                    <line x1="50" y1="200" x2="750" y2="200" stroke="#334155" stroke-width="1" stroke-dasharray="4" />
+                    
+                    <!-- Labels -->
+                    <text x="20" y="85" fill="#94a3b8" font-size="12" font-family="monospace">MASTER</text>
+                    <text x="20" y="205" fill="#94a3b8" font-size="12" font-family="monospace">DEVELOP</text>
+
+                    <!-- Dynamic Content Group -->
+                    <g id="connections-group"></g>
+                    <g id="nodes-group"></g>
+                    <g id="pointers-group"></g>
+                </svg>
+                
+                <!-- CI Status Overlay -->
+                <div id="ci-status" class="absolute bottom-4 right-4 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono text-slate-400 flex items-center gap-2">
+                    <span id="ci-indicator" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                    CI 流水线: <span id="ci-text">待机中</span>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="p-6 border-t border-slate-100 bg-white">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Step 1: Commit -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <span class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs">1</span>
+                            TDD 提交
+                        </div>
+                        <p class="text-xs text-slate-500">在 Develop 分支模拟 TDD 循环。每次提交会改变代码状态。</p>
+                        <button onclick="handleCommit()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all shadow-md active:scale-95">
+                            Commit (提交代码)
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Push & CI -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <span class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs">2</span>
+                            持续集成
+                        </div>
+                        <p class="text-xs text-slate-500">将本地变更推送到远程。CI 仅在非 RED 状态下通过。</p>
+                        <button onclick="handlePush()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-medium transition-all shadow-md active:scale-95">
+                            Push & CI 验证
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Merge -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                            <span class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs">3</span>
+                            合入主干
+                        </div>
+                        <p class="text-xs text-slate-500">将验证通过的代码通过 Fast-forward 合并至 Master。</p>
+                        <button id="merge-btn" onclick="handleMerge()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-all shadow-md active:scale-95 opacity-50 cursor-not-allowed" disabled>
+                            Merge to Master
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educational Content -->
+        <footer class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <h3 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Git 有向无环图 (DAG)
+                </h3>
+                <p class="text-blue-900 leading-relaxed">
+                    分支本质上是指向提交对象的可变指针。在数学模型中，提交序列满足拓扑顺序约束：
+                    \[ G = (V, E) \text{ 其中 } (u, v) \in E \implies \text{time}(u) < \text{time}(v) \]
+                    每次 Commit 都会生成一个新的原子单元 \( V_{i} \)，并将指针向前推移。
+                </p>
+            </div>
+            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                <h3 class="font-bold text-emerald-800 mb-2 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Master 稳定性约束
+                </h3>
+                <p class="text-emerald-900 leading-relaxed">
+                    为了保证发布质量，Master 分支必须保持在 Stable 状态。在 TDD 流程中，必须完成从 \( Red \rightarrow Green \rightarrow Refactor \) 的闭环，并由 CI 流水线确认验证后，方可进行 Fast-forward 合并。
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // State Management
+        const TDD_STAGES = ['RED', 'GREEN', 'REFACTOR'];
+        let commits = [
+            { id: 'c0', x: 80, y: 80, branch: 'master', status: 'STABLE', parent: null, isVerified: true }
+        ];
+        let currentDevStage = 0; // Index for TDD_STAGES
+        let masterHeadIndex = 0;
+        let devHeadIndex = 0; // Points to the latest commit on develop
+        let isCiPassed = false;
+
+        const nodesGroup = document.getElementById('nodes-group');
+        const connectionsGroup = document.getElementById('connections-group');
+        const pointersGroup = document.getElementById('pointers-group');
+        const ciIndicator = document.getElementById('ci-indicator');
+        const ciText = document.getElementById('ci-text');
+        const mergeBtn = document.getElementById('merge-btn');
+
+        // Initialization
+        function init() {
+            render();
+        }
+
+        function handleCommit() {
+            const lastCommit = commits[commits.length - 1];
+            const lastOnDev = commits.filter(c => c.branch === 'develop').pop() || commits[0];
+            
+            // Limit commits for visualization purposes
+            if (commits.length > 8) {
+                alert("演示空间已满，请刷新或合并至 Master。");
+                return;
+            }
+
+            const newCommit = {
+                id: 'c' + commits.length,
+                x: (commits.length * 80) + 80,
+                y: 200,
+                branch: 'develop',
+                status: TDD_STAGES[currentDevStage],
+                parent: lastOnDev.id,
+                isVerified: false
+            };
+
+            commits.push(newCommit);
+            devHeadIndex = commits.length - 1;
+            
+            // Cycle TDD stage
+            currentDevStage = (currentDevStage + 1) % 3;
+            isCiPassed = false;
+            updateUIState();
+            render();
+        }
+
+        function handlePush() {
+            if (commits.length < 2) return;
+            
+            ciText.innerText = "运行测试中...";
+            ciIndicator.className = "w-2 h-2 rounded-full bg-amber-500 animate-bounce";
+            
+            const latest = commits[commits.length - 1];
+            
+            setTimeout(() => {
+                if (latest.status === 'RED') {
+                    ciText.innerText = "CI 失败: 测试未通过";
+                    ciIndicator.className = "w-2 h-2 rounded-full bg-rose-500";
+                    isCiPassed = false;
+                } else {
+                    ciText.innerText = "CI 成功: 验证通过";
+                    ciIndicator.className = "w-2 h-2 rounded-full bg-emerald-500";
+                    latest.isVerified = true;
+                    isCiPassed = true;
+                }
+                updateUIState();
+                render();
+            }, 800);
+        }
+
+        function handleMerge() {
+            if (!isCiPassed) return;
+
+            const latestOnDev = commits[commits.length - 1];
+            
+            // Fast-forward simulation: Move master head to current dev position
+            // In a real DAG, this creates a merge node or moves the pointer
+            const mergeNode = {
+                id: 'm' + commits.length,
+                x: latestOnDev.x,
+                y: 80,
+                branch: 'master',
+                status: 'STABLE',
+                parent: latestOnDev.id,
+                isVerified: true
+            };
+
+            commits.push(mergeNode);
+            masterHeadIndex = commits.length - 1;
+            devHeadIndex = commits.length - 1;
+            isCiPassed = false;
+            
+            updateUIState();
+            render();
+        }
+
+        function updateUIState() {
+            if (isCiPassed) {
+                mergeBtn.disabled = false;
+                mergeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                mergeBtn.disabled = true;
+                mergeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function render() {
+            nodesGroup.innerHTML = '';
+            connectionsGroup.innerHTML = '';
+            pointersGroup.innerHTML = '';
+
+            commits.forEach((commit, index) => {
+                // Draw Connections
+                if (commit.parent) {
+                    const parent = commits.find(c => c.id === commit.parent);
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", parent.x);
+                    line.setAttribute("y1", parent.y);
+                    line.setAttribute("x2", commit.x);
+                    line.setAttribute("y2", commit.y);
+                    line.setAttribute("stroke", "#475569");
+                    line.setAttribute("stroke-width", "2");
+                    line.classList.add("branch-line");
+                    connectionsGroup.appendChild(line);
+                }
+
+                // Draw Node
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.classList.add("node-enter");
+
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", commit.x);
+                circle.setAttribute("cy", commit.y);
+                circle.setAttribute("r", "8");
+                
+                let color = "#64748b";
+                if (commit.status === 'RED') color = "#f43f5e";
+                if (commit.status === 'GREEN') color = "#10b981";
+                if (commit.status === 'REFACTOR') color = "#f59e0b";
+                if (commit.status === 'STABLE') color = "#0ea5e9";
+                
+                circle.setAttribute("fill", color);
+                if (commit.isVerified) circle.style.filter = "drop-shadow(0 0 4px " + color + ")";
+                
+                g.appendChild(circle);
+
+                // Commit Text
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", commit.x - 10);
+                txt.setAttribute("y", commit.y + 25);
+                txt.setAttribute("fill", "#64748b");
+                txt.setAttribute("font-size", "10");
+                txt.setAttribute("font-family", "monospace");
+                txt.textContent = commit.id;
+                g.appendChild(txt);
+
+                nodesGroup.appendChild(g);
+            });
+
+            // Draw Pointers
+            const masterHead = commits.filter(c => c.branch === 'master').pop();
+            const devHead = commits.filter(c => c.branch === 'develop').pop() || commits[0];
+
+            drawPointer(masterHead.x, masterHead.y - 25, "Master", "#0ea5e9");
+            drawPointer(devHead.x, devHead.y + 40, "Develop", "#10b981");
+        }
+
+        function drawPointer(x, y, label, color) {
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.style.transition = "transform 0.5s ease-in-out";
+            
+            const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const points = label === "Master" ? 
+                `${x},${y+10} ${x-5},${y} ${x+5},${y}` : 
+                `${x},${y-15} ${x-5},${y-5} ${x+5},${y-5}`;
+            poly.setAttribute("points", points);
+            poly.setAttribute("fill", color);
+            
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", x - 25);
+            rect.setAttribute("y", label === "Master" ? y - 15 : y - 5);
+            rect.setAttribute("width", "50");
+            rect.setAttribute("height", "16");
+            rect.setAttribute("rx", "4");
+            rect.setAttribute("fill", color);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", label === "Master" ? y - 3 : y + 7);
+            text.setAttribute("fill", "white");
+            text.setAttribute("font-size", "10");
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("font-weight", "bold");
+            text.textContent = label;
+
+            g.appendChild(poly);
+            g.appendChild(rect);
+            g.appendChild(text);
+            pointersGroup.appendChild(g);
+        }
+
+        init();
+    </script>
+</body>
+</html>

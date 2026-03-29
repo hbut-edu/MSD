@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 赋能下的 TDD 与 CI/CD 全链路实战 - 打印版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", "SimHei", sans-serif;
+            line-height: 1.8;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+            font-size: 12pt;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background: white;
+        }
+        h1 {
+            font-size: 20pt;
+            color: #000;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+            page-break-after: avoid;
+        }
+        h2 {
+            font-size: 16pt;
+            color: #000;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 14pt;
+            color: #000;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+        h4 {
+            font-size: 12pt;
+            color: #000;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+        p {
+            margin: 10px 0;
+            text-align: justify;
+        }
+        code {
+            font-family: "Consolas", "Monaco", monospace;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10pt;
+            color: #000;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        pre code {
+            background: none;
+            color: #000;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            font-size: 10pt;
+        }
+        th {
+            background: #e0e0e0;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            page-break-inside: avoid;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .toc h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin: 10px 0;
+        }
+        .toc a {
+            color: #000;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        hr {
+            border: none;
+            border-top: 2px solid #000;
+            margin: 30px 0;
+        }
+        strong {
+            font-weight: bold;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .page {
+                width: 100%;
+                min-height: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            .toc {
+                page-break-after: always;
+            }
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow: visible;
+            }
+            img {
+                max-width: 100% !important;
+                page-break-inside: avoid;
+            }
+            h1, h2, h3, h4 {
+                page-break-after: avoid;
+            }
+            table, pre, .toc {
+                page-break-inside: avoid;
+            }
+            a {
+                text-decoration: none;
+                color: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1>《现代软件开发技术》上机实验手册：AI 赋能下的 TDD 与 CI/CD 全链路实战</h1>
+
+        <div class="toc">
+            <h2>目录</h2>
+            <ul>
+                <li><a href="#实验主题">实验主题</a></li>
+                <li><a href="#实验目标">实验目标</a></li>
+                <li><a href="#实验环境与先决条件">实验环境与先决条件</a></li>
+                <li><a href="#第一阶段">第一阶段：本地开发环境基建</a></li>
+                <li><a href="#第二阶段">第二阶段：云端基础设施搭建</a></li>
+                <li><a href="#第三阶段">第三阶段：项目克隆、分支管理与 CI/CD 剧本装配</a></li>
+                <li><a href="#第四阶段">第四阶段：TDD 测试驱动对抗实验</a></li>
+                <li><a href="#第五阶段">第五阶段：实验总结与思考</a></li>
+                <li><a href="#常见问题与解决方案">常见问题与解决方案</a></li>
+                <li><a href="#附录">附录：常用 Git 命令参考</a></li>
+            </ul>
+        </div>
+
+        <h2 id="实验主题">实验主题</h2>
+        <p>AI时代的工程安全网——Git协同、CI/CD与TDD测试驱动开发</p>
+
+        <h2 id="实验目标">实验目标</h2>
+        <ol>
+            <li>理解AI时代软件工程的自动化验证思维</li>
+            <li>掌握Git版本控制与协同开发流程</li>
+            <li>学会配置Gitee平台及SSH密钥认证</li>
+            <li>掌握CI/CD流水线的配置与使用方法</li>
+            <li>理解并实践TDD测试驱动开发方法论</li>
+            <li>学会编写测试用例并进行代码验证</li>
+            <li>掌握代码质量检查与自动化测试流程</li>
+            <li>建立对AI生成代码的正确性约束能力</li>
+        </ol>
+
+        <hr>
+
+        <h2 id="实验环境与先决条件">实验环境与先决条件</h2>
+        <ul>
+            <li><strong>操作系统</strong>：Windows 10/11 或 macOS</li>
+            <li><strong>网络要求</strong>：全过程需保持互联网畅通</li>
+            <li><strong>核心工具链</strong>：Git、Trae IDE、Gitee、Gitee Go</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="第一阶段">第一阶段：本地开发环境基建 (软件安装与配置)</h2>
+
+        <h3>1. 安装与配置版本控制系统 Git</h3>
+        <p>Git 是现代软件工程的基石。</p>
+        <ul>
+            <li><strong>Windows 环境</strong>：访问 Git 官网下载并按默认选项安装 Git for Windows。</li>
+            <li><strong>macOS 环境</strong>：打开终端（Terminal），输入 <code>git --version</code>，若未安装，系统会自动弹出命令行开发者工具安装提示，按提示安装即可。</li>
+        </ul>
+
+        <p><strong>全局变量配置</strong>：
+打开命令行（Windows 使用 Git Bash，macOS 使用 Terminal），执行以下命令配置身份信息（将记录在每一次代码提交中）：</p>
+
+        <pre><code>git config --global user.name "你的真实姓名"
+git config --global user.email "你的邮箱@example.com"
+# 配置默认分支名，推荐统一使用 master
+git config --global init.defaultBranch master</code></pre>
+
+        <h3>2. 配置 SSH 公钥（工业界免密通信标准）</h3>
+        <p>为了实现本地 IDE 到云端代码库的免密推送，必须配置 SSH 密钥对。</p>
+        <ol>
+            <li><p>在本地命令行中生成密钥（一路回车默认即可）：</p>
+            <pre><code>ssh-keygen -t ed25519 -C "你的邮箱@example.com"</code></pre></li>
+            <li><p>查看并复制生成的公钥内容：
+               - Windows: <code>cat ~/.ssh/id_ed25519.pub</code>
+               - macOS: <code>cat ~/.ssh/id_ed25519.pub</code></p></li>
+            <li><p><strong>后续步骤</strong>：在注册 Gitee 后，将此公钥内容配置到 Gitee 账号中。</p></li>
+        </ol>
+
+        <h3>3. 安装字节跳动 Trae IDE</h3>
+        <p>Trae 是一款原生的 AI IDE，深度集成了大语言模型，是我们本次"指挥 AI 写代码"的主控台。</p>
+        <ul>
+            <li>访问 Trae 官方网站，下载对应操作系统的安装包并完成安装。</li>
+            <li>启动 Trae，注册并登录账号以获取完整的 AI 辅助配额。</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="第二阶段">第二阶段：云端基础设施搭建 (Gitee 平台配置)</h2>
+
+        <h3>1. 注册 Gitee 账号与实名认证</h3>
+        <ul>
+            <li>访问 Gitee 官网 (gitee.com) 完成账号注册。</li>
+            <li>进入个人设置中心，<strong>完成实名认证</strong>。Gitee Go（云端流水线）必须在账号实名认证后才能分配免费的云计算资源和构建时长。</li>
+            <li>进入设置 -&gt; <strong>SSH 公钥</strong>，将第一阶段复制的公钥内容粘贴进去并保存。</li>
+        </ul>
+
+        <h3>2. 创建课程项目仓库</h3>
+        <ol>
+            <li>在 Gitee 首页点击右上角的 <strong>"+"</strong> -&gt; <strong>"新建仓库"</strong>。</li>
+            <li>仓库名称填写：<code>genshin-gacha-tdd</code>。</li>
+            <li>设为<strong>公开</strong>。</li>
+            <li><strong>注意</strong>：不要勾选任何"初始化仓库"选项（如 README 或 .gitignore），创建一个纯空仓库。</li>
+        </ol>
+
+        <h3>3. 开启 Gitee Go 云端流水线服务</h3>
+        <ol>
+            <li>进入刚创建好的 <code>genshin-gacha-tdd</code> 仓库主页。</li>
+            <li>点击仓库顶部导航栏的 <strong>"Gitee Go 或 流水线"</strong> 标签。</li>
+            <li>点击 <strong>"开通服务"</strong>。开通成功后，无需使用页面上的模板，直接关闭页面，我们将使用代码（Pipeline as Code）来定义流水线。</li>
+        </ol>
+
+        <hr>
+
+        <h2 id="第三阶段">第三阶段：项目克隆、分支管理与 CI/CD 剧本装配</h2>
+
+        <p>本阶段提供<strong>命令行（CLI）</strong>与<strong>IDE可视化（GUI）</strong>两种操作方式，实际开发中可结合使用。</p>
+
+        <h3>1. 在 Trae IDE 中拉取代码并创建分支</h3>
+
+        <p><strong>方式 A：命令行操作 (推荐理解底层逻辑)</strong></p>
+        <ol>
+            <li>打开 Trae IDE，点击菜单栏 <code>Terminal</code> -&gt; <code>New Terminal</code>。</li>
+            <li><p>执行克隆与分支创建：</p>
+            <pre><code># 替换为你的 SSH 仓库地址
+git clone git@gitee.com:你的用户名/genshin-gacha-tdd.git
+cd genshin-gacha-tdd
+
+# 初始化首次提交
+echo "# 原神抽卡 TDD 实验" &gt; README.md
+git add README.md
+git commit -m "docs: add Initial README"
+git branch -M master
+git push -u origin master
+
+# 创建并切换到日常开发分支
+git checkout -b develop</code></pre></li>
+        </ol>
+
+        <p><strong>方式 B：Trae IDE 可视化操作 (进阶效率首选)</strong></p>
+        <ol>
+            <li><strong>克隆</strong>：按 <code>Ctrl+Shift+P</code> (Win) 或 <code>Cmd+Shift+P</code> (Mac) 唤醒命令面板，输入 <code>Git: Clone</code>，粘贴 SSH 仓库地址，选择本地文件夹保存，点击弹出的 <strong>Open</strong> 打开项目。</li>
+            <li><strong>建分支</strong>：点击 IDE 左下角的状态栏分支名（如 <code>master</code>），选择 <strong>+ Create new branch...</strong>，输入 <code>develop</code> 并回车，完成分支创建与切换。</li>
+        </ol>
+
+        <h3>2. 编写 CI/CD 流水线剧本</h3>
+        <p>在项目根目录下创建一个名为 <code>.workflow</code> 的文件夹，并在其中新建文件 <code>python-ci.yml</code>。输入以下 Gitee Go 流水线配置：</p>
+
+        <pre><code>version: '1.0'
+name: gacha-tdd-pipeline
+displayName: 原神抽卡逻辑 TDD 自动化流水线
+triggers:
+  trigger: auto
+  push:
+    branches:
+      - develop
+stages:
+  - name: stage-ci
+    displayName: 语法与逻辑测试
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@python
+        name: run-pytest
+        displayName: 执行测试拦截
+        pythonVersion: 3.9
+        working-directory: .  # 添加工作目录配置，确保CI/CD能正确找到测试文件
+        commands:
+          # 使用清华源加速依赖安装
+          - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+          # 检查代码规范，阻断严重语法错误
+          - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # 运行 pytest，不通过则流水线标红失败
+          - pytest test_business_logic.py -v</code></pre>
+
+        <hr>
+
+        <h2 id="第四阶段">第四阶段：TDD 测试驱动对抗实验</h2>
+
+        <p><strong>业务需求：开发《原神》祈愿保底概率计算器</strong></p>
+        <ol>
+            <li>基础五星角色出率为 0.6%。</li>
+            <li>最多 90 次祈愿必定获取五星角色（硬保底）。</li>
+            <li>从第 74 抽开始，五星出率每抽递增 6%（软保底）。</li>
+        </ol>
+
+        <h3>步骤 0：创建项目配置文件</h3>
+
+        <h4>创建依赖管理文件</h4>
+        <p>在项目根目录创建 <code>requirements.txt</code>，内容如下：</p>
+        <pre><code>pytest&gt;=7.0.0
+flake8&gt;=5.0.0</code></pre>
+
+        <h4>创建 pytest 配置文件</h4>
+        <p>在项目根目录创建 <code>pytest.ini</code>，内容如下：</p>
+        <pre><code>[pytest]
+testpaths = .
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*</code></pre>
+
+        <h4>创建 .gitignore 文件</h4>
+        <p>在项目根目录创建 <code>.gitignore</code>，内容如下：</p>
+        <pre><code># Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log</code></pre>
+
+        <h3>步骤 1：编写测试用例（先写测试，后写实现）</h3>
+
+        <p>在项目根目录创建 <code>test_business_logic.py</code>，内容如下：</p>
+
+        <pre><code>import pytest
+from business_logic import calculate_gacha_probability
+
+class TestGachaProbability:
+    def test_base_probability(self):
+        """测试基础概率：1-73抽应为0.6%"""
+        for pull in range(1, 74):
+            prob = calculate_gacha_probability(pull)
+            assert prob == 0.006, f"第{pull}抽概率错误"
+
+    def test_soft_pity_start(self):
+        """测试软保底开始：第74抽概率应为6.6%"""
+        prob = calculate_gacha_probability(74)
+        assert prob == 0.066, "第74抽概率错误"
+
+    def test_soft_pity_increase(self):
+        """测试软保底递增：第74-89抽每抽递增6%"""
+        expected_prob = 0.066
+        for pull in range(74, 90):
+            prob = calculate_gacha_probability(pull)
+            assert prob == expected_prob, f"第{pull}抽概率错误"
+            expected_prob += 0.06
+
+    def test_hard_pity_guarantee(self):
+        """测试硬保底：第90抽必定获取（概率100%）"""
+        prob = calculate_gacha_probability(90)
+        assert prob == 1.0, "第90抽概率错误"
+
+    def test_invalid_pull_number(self):
+        """测试无效的抽数：0或负数应抛出异常"""
+        with pytest.raises(ValueError):
+            calculate_gacha_probability(0)
+        
+        with pytest.raises(ValueError):
+            calculate_gacha_probability(-1)
+
+    def test_pull_over_90(self):
+        """测试超过90抽：超过90抽应重置为新一轮保底"""
+        prob = calculate_gacha_probability(91)
+        assert prob == 0.006, "第91抽（新一轮第1抽）概率错误"</code></pre>
+
+        <h3>步骤 2：提交测试用例，触发 CI/CD 拦截</h3>
+
+        <ol>
+            <li><p><strong>提交测试用例到 develop 分支</strong>：</p>
+            <pre><code>git add requirements.txt pytest.ini .gitignore test_business_logic.py
+git commit -m "test: add gacha probability test cases"
+git push origin develop</code></pre></li>
+            <li><p><strong>观察 CI/CD 流水线</strong>：
+               - 访问 Gitee 仓库页面，点击 <code>Gitee Go</code> 标签
+               - <strong>预期结果</strong>：流水线标红失败（因为 <code>business_logic.py</code> 还不存在）
+               - <strong>验证要点</strong>：确认 CI/CD 能够正确拦截错误提交</p></li>
+        </ol>
+
+        <h3>步骤 3：使用 AI 生成业务逻辑实现</h3>
+
+        <ol>
+            <li>在项目根目录创建 <code>business_logic.py</code> 文件</li>
+            <li>使用 Trae IDE 的 AI 功能，根据业务需求生成实现代码</li>
+            <li><p><strong>AI 提示词参考</strong>：</p>
+            <pre><code>请帮我实现一个原神抽卡概率计算器，需求如下：
+1. 基础五星角色出率为 0.6%（0.006）
+2. 最多 90 次祈愿必定获取五星角色（硬保底）
+3. 从第 74 抽开始，五星出率每抽递增 6%（软保底）
+4. 超过 90 抽后重置为新一轮保底
+5. 输入为抽数（正整数），输出为当前抽的概率
+
+要求：
+- 函数名为 calculate_gacha_probability(pull_num)
+- 参数 pull_num 为正整数
+- 返回值为 float 类型，表示概率
+- 对于无效输入（0或负数）抛出 ValueError 异常</code></pre></li>
+        </ol>
+
+        <h3>步骤 4：本地验证 AI 生成代码</h3>
+
+        <p>在本地运行测试用例，验证 AI 生成的代码是否正确：</p>
+
+        <pre><code># 安装依赖
+pip install -r requirements.txt
+
+# 运行测试
+pytest test_business_logic.py -v</code></pre>
+
+        <p><strong>预期结果</strong>：所有测试用例都应该通过。</p>
+
+        <h3>步骤 5：提交业务逻辑，触发 CI/CD 验证</h3>
+
+        <ol>
+            <li><p><strong>提交业务逻辑到 develop 分支</strong>：</p>
+            <pre><code>git add business_logic.py
+git commit -m "feat: implement gacha probability calculation"
+git push origin develop</code></pre></li>
+            <li><p><strong>观察 CI/CD 流水线</strong>：
+               - 访问 Gitee 仓库页面，点击 <code>Gitee Go</code> 标签
+               - <strong>预期结果</strong>：流水线全部通过（绿色）
+               - <strong>验证要点</strong>：确认 AI 生成的代码符合测试用例要求</p></li>
+        </ol>
+
+        <h3>步骤 6：创建 Pull Request 并合并到 master</h3>
+
+        <ol>
+            <li><p><strong>创建 Pull Request</strong>：
+               - 在 Gitee 仓库页面，点击 <code>Pull Requests</code> -&gt; <code>新建 Pull Request</code>
+               - 源分支：<code>develop</code>，目标分支：<code>master</code>
+               - 填写标题和描述，点击 <code>创建</code></p></li>
+            <li><p><strong>代码审查与合并</strong>：
+               - 审查代码变更
+               - 确认所有 CI/CD 检查通过
+               - 点击 <code>合并</code> 按钮</p></li>
+        </ol>
+
+        <hr>
+
+        <h2 id="第五阶段">第五阶段：实验总结与思考</h2>
+
+        <h3>实验成果验证</h3>
+        <ol>
+            <li>✅ Git 版本控制环境配置完成</li>
+            <li>✅ Gitee 平台配置完成（SSH 密钥、仓库、流水线）</li>
+            <li>✅ CI/CD 流水线配置完成并成功运行</li>
+            <li>✅ TDD 测试驱动开发流程实践完成</li>
+            <li>✅ AI 生成代码通过测试验证</li>
+        </ol>
+
+        <h3>关键思考问题</h3>
+        <ol>
+            <li><strong>为什么要先写测试用例，再写实现代码？</strong></li>
+            <li><strong>CI/CD 流水线在 AI 时代的作用是什么？</strong></li>
+            <li><strong>如何确保 AI 生成的代码符合业务需求和质量标准？</strong></li>
+            <li><strong>TDD 测试驱动开发对 AI 辅助编程有什么约束作用？</strong></li>
+        </ol>
+
+        <h3>实验延伸与拓展</h3>
+        <ol>
+            <li><strong>尝试更复杂的业务逻辑</strong>：例如实现武器池保底、角色池继承保底等高级功能</li>
+            <li><strong>添加更多测试用例</strong>：增加边界测试、性能测试、异常测试</li>
+            <li><strong>优化 CI/CD 流水线</strong>：添加代码覆盖率报告、性能测试、安全扫描</li>
+            <li><strong>实践团队协作</strong>：邀请同学加入项目，模拟真实团队开发流程</li>
+        </ol>
+
+        <hr>
+
+        <h2 id="常见问题与解决方案">常见问题与解决方案</h2>
+
+        <h3>Q1: SSH 密钥配置失败怎么办？</h3>
+        <p><strong>A</strong>:
+- 检查密钥是否正确生成（<code>ls ~/.ssh/</code>）
+- 确认公钥内容完整复制（从 <code>ssh-ed25519</code> 开始到邮箱结束）
+- 测试 SSH 连接：<code>ssh -T git@gitee.com</code></p>
+
+        <h3>Q2: CI/CD 流水线一直失败？</h3>
+        <p><strong>A</strong>:
+- 检查 <code>.workflow/python-ci.yml</code> 配置是否正确
+- 确认 <code>requirements.txt</code> 包含所有依赖
+- 查看流水线日志，定位具体错误原因</p>
+
+        <h3>Q3: AI 生成的代码通不过测试？</h3>
+        <p><strong>A</strong>:
+- 检查测试用例是否正确
+- 重新生成更详细的提示词
+- 手动调试和修正 AI 生成的代码
+- 考虑将测试失败的用例反馈给 AI，让它重新生成</p>
+
+        <h3>Q4: 如何查看流水线日志？</h3>
+        <p><strong>A</strong>:
+- 在 Gitee 仓库页面点击 <code>Gitee Go</code>
+- 点击对应的流水线执行记录
+- 查看每个步骤的详细日志输出</p>
+
+        <hr>
+
+        <h2 id="附录">附录：常用 Git 命令参考</h2>
+
+        <pre><code># 查看仓库状态
+git status
+
+# 查看提交历史
+git log --oneline --graph
+
+# 创建并切换分支
+git checkout -b &lt;branch-name&gt;
+
+# 切换分支
+git checkout &lt;branch-name&gt;
+
+# 查看所有分支
+git branch -a
+
+# 提交代码
+git add &lt;files&gt;
+git commit -m "message"
+git push origin &lt;branch-name&gt;
+
+# 拉取远程更新
+git pull origin &lt;branch-name&gt;
+
+# 合并分支
+git merge &lt;source-branch&gt;</code></pre>
+
+        <hr>
+
+        <p><strong>实验完成时间</strong>：建议 4-6 课时
+<br><strong>难度等级</strong>：中等
+<br><strong>前置知识</strong>：Python 基础语法、Git 基础操作</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook 联动模拟 - 交互式学习</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes flow {
+            0% { transform: translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(calc(100% + 2rem)); opacity: 0; }
+        }
+        .packet-animation {
+            animation: flow 2s linear forwards;
+        }
+        .code-font { font-family: 'Fira Code', 'Courier New', monospace; }
+        .terminal-scroll::-webkit-scrollbar { width: 4px; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 2px; }
+    </style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const katexOptions = {
+        delimiters: [
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false,
+        strict: false,
+        trust: true
+    };
+
+    let renderTimeout;
+    function safeRender() {
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+            renderMathInElement(document.body, katexOptions);
+        }, 100);
+    }
+
+    renderMathInElement(document.body, katexOptions);
+
+    const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        mutations.forEach((mutation) => {
+            if (mutation.target &&
+                mutation.target.className &&
+                typeof mutation.target.className === 'string' &&
+                mutation.target.className.includes('katex')) {
+                return;
+            }
+            shouldRender = true;
+        });
+
+        if (shouldRender) {
+            safeRender();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    setInterval(() => {
+        const text = document.body.innerText;
+        if (text.includes('\\(') || text.includes('$$')) {
+            safeRender();
+        }
+    }, 2000);
+});
+</script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                    Webhook 联动模拟
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">软件工程：基于事件驱动的系统解耦与自动化</p>
+            </div>
+            <div class="text-xs text-slate-500 bg-slate-800 p-2 rounded border border-slate-700">
+                公式: \( \text{Event} \xrightarrow{\text{HTTP POST}} \text{Callback URL} \)
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto w-full p-4 md:p-8 grid grid-cols-1 lg:grid-cols-11 gap-6 items-start">
+        
+        <!-- Left: Git Repository -->
+        <div class="lg:col-span-4 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-2xl">
+            <div class="bg-slate-700/50 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-orange-500"></span> Git 仓库 (源系统)
+                </span>
+                <span class="text-[10px] text-slate-500">localhost:3000</span>
+            </div>
+            <div class="p-4 space-y-4">
+                <div class="bg-slate-900 p-3 rounded-md border border-slate-700">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-xs text-emerald-400">main.js</span>
+                    </div>
+                    <textarea id="codeEditor" class="w-full bg-transparent text-sm code-font text-blue-300 outline-none resize-none" rows="6" spellcheck="false">function helloWorld() {
+  console.log("Hello, Webhook!");
+  // 修改此处并点击推送
+  return true;
+}</textarea>
+                </div>
+                <button id="pushBtn" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 transition-all text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                    推送代码 (Git Push)
+                </button>
+                <div class="text-[11px] text-slate-500 leading-relaxed">
+                    注：推送操作将触发本地事件监听，并根据预设地址发送 \( JSON \) 载荷。
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Network Path -->
+        <div class="lg:col-span-3 h-full flex flex-col justify-center items-center py-8 relative min-h-[120px]">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-full h-[2px] bg-dashed bg-slate-700 border-t border-dashed border-slate-600"></div>
+            </div>
+            <div id="packetContainer" class="relative w-full h-12">
+                <!-- Packets will be injected here -->
+            </div>
+            <div class="mt-4 text-center">
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700 text-[10px] text-slate-400 uppercase">
+                    HTTP POST 传输层
+                </span>
+            </div>
+        </div>
+
+        <!-- Right: CI Server -->
+        <div class="lg:col-span-4 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-2xl">
+            <div class="bg-slate-700/50 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-blue-500"></span> CI 构建服务器 (回调端)
+                </span>
+                <span class="text-[10px] text-slate-500">api.ci-server.io/webhook</span>
+            </div>
+            <div class="p-0 flex flex-col h-[340px]">
+                <div id="terminal" class="flex-grow p-4 overflow-y-auto terminal-scroll code-font text-xs bg-black/40 space-y-1">
+                    <div class="text-slate-500 italic">等待 Webhook 信号...</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 border-t border-slate-700">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] text-slate-500 uppercase tracking-tighter">实时 Payload 预览</span>
+                        <span id="statusBadge" class="px-1.5 py-0.5 rounded text-[10px] bg-slate-700 text-slate-400">IDLE</span>
+                    </div>
+                    <div id="payloadView" class="text-[10px] code-font text-emerald-500 truncate">{}</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Legend -->
+    <footer class="p-6 max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-slate-800/40 p-3 rounded border border-slate-800">
+            <h3 class="text-sm font-bold text-blue-400 mb-1">1. 事件驱动 (EDA)</h3>
+            <p class="text-xs text-slate-400">由推送行为主动触发，而非服务器轮询 Git 仓库状态。</p>
+        </div>
+        <div class="bg-slate-800/40 p-3 rounded border border-slate-800">
+            <h3 class="text-sm font-bold text-blue-400 mb-1">2. 异步解耦</h3>
+            <p class="text-xs text-slate-400">Git 仓库发出 Webhook 后即刻结束，不阻塞后续本地开发任务。</p>
+        </div>
+        <div class="bg-slate-800/40 p-3 rounded border border-slate-800">
+            <h3 class="text-sm font-bold text-blue-400 mb-1">3. 幂等性与状态</h3>
+            <p class="text-xs text-slate-400">CI 接收端立即返回 \( 202 \) 确认接收，随后再执行长耗时的构建任务。</p>
+        </div>
+    </footer>
+
+    <script>
+        const pushBtn = document.getElementById('pushBtn');
+        const packetContainer = document.getElementById('packetContainer');
+        const terminal = document.getElementById('terminal');
+        const payloadView = document.getElementById('payloadView');
+        const statusBadge = document.getElementById('statusBadge');
+        const codeEditor = document.getElementById('codeEditor');
+
+        let isProcessing = false;
+
+        function logToTerminal(msg, type = 'info') {
+            const div = document.createElement('div');
+            const time = new Date().toLocaleTimeString().split(' ')[0];
+            let color = 'text-slate-300';
+            if (type === 'success') color = 'text-emerald-400';
+            if (type === 'warn') color = 'text-yellow-400';
+            if (type === 'error') color = 'text-red-400';
+            if (type === 'cmd') color = 'text-blue-400';
+
+            div.className = `${color} border-l-2 border-transparent pl-2`;
+            div.innerHTML = `<span class="text-slate-600 mr-2">[${time}]</span> ${msg}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function createPacket(payload) {
+            const packet = document.createElement('div');
+            packet.className = 'packet-animation absolute left-0 top-0 bg-blue-500 text-white text-[10px] px-2 py-1 rounded shadow-lg flex items-center gap-2 whitespace-nowrap z-20';
+            packet.innerHTML = `
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 4L3 11l7 1 7-7-7 8 8 5 3-13z"></path></svg>
+                POST /webhook {commit: ${payload.after.substring(0,7)}}
+            `;
+            packetContainer.appendChild(packet);
+            
+            // Remove after animation
+            setTimeout(() => packet.remove(), 2000);
+        }
+
+        async function simulateCIProcess(payload) {
+            // Step 1: Webhook Received (202 Accepted)
+            statusBadge.innerText = 'RECEIVING';
+            statusBadge.className = 'px-1.5 py-0.5 rounded text-[10px] bg-blue-900 text-blue-200';
+            
+            logToTerminal(`接收到 Webhook 来自 GitHub (Event: push)`, 'success');
+            logToTerminal(`验证签名并返回 HTTP 202 Accepted`, 'info');
+            payloadView.innerText = JSON.stringify(payload);
+
+            // Simulation of Decoupling: In reality CI starts worker, but lets simulate here
+            await new Promise(r => setTimeout(r, 800));
+            
+            statusBadge.innerText = 'BUILDING';
+            statusBadge.className = 'px-1.5 py-0.5 rounded text-[10px] bg-yellow-900 text-yellow-200 animate-pulse';
+
+            logToTerminal(`$ git clone --depth=1 repo.git`, 'cmd');
+            await new Promise(r => setTimeout(r, 600));
+            logToTerminal(`检查代码差异... 分支: ${payload.ref.split('/').pop()}`, 'info');
+            
+            await new Promise(r => setTimeout(r, 1000));
+            logToTerminal(`$ npm install`, 'cmd');
+            await new Promise(r => setTimeout(r, 1500));
+            
+            logToTerminal(`$ npm test`, 'cmd');
+            logToTerminal(`PASS: Tests executed for commit ${payload.after.substring(0,7)}`, 'success');
+            
+            await new Promise(r => setTimeout(r, 1000));
+            logToTerminal(`$ docker build -t web-app:latest .`, 'cmd');
+            await new Promise(r => setTimeout(r, 1200));
+            
+            logToTerminal(`部署成功! 服务已在端口 8080 上线`, 'success');
+            statusBadge.innerText = 'SUCCESS';
+            statusBadge.className = 'px-1.5 py-0.5 rounded text-[10px] bg-emerald-900 text-emerald-200';
+        }
+
+        pushBtn.addEventListener('click', () => {
+            if (isProcessing) return;
+
+            const commitHash = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
+            const payload = {
+                ref: "refs/heads/main",
+                before: "7c4826b53949f5",
+                after: commitHash,
+                repository: { name: "my-web-app", owner: "user123" },
+                pusher: { name: "user123", email: "user@example.com" },
+                timestamp: new Date().toISOString()
+            };
+
+            // Trigger Animation
+            createPacket(payload);
+
+            // UI Feedback on Git Side
+            pushBtn.disabled = true;
+            pushBtn.innerText = "正在发送报文...";
+            pushBtn.classList.replace('bg-blue-600', 'bg-slate-600');
+
+            // Scientific Constraint: Git finishes push regardless of CI status
+            setTimeout(() => {
+                pushBtn.disabled = false;
+                pushBtn.innerHTML = `
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
+                    推送代码 (Git Push)
+                `;
+                pushBtn.classList.replace('bg-slate-600', 'bg-blue-600');
+                // The Git system thinks it's done here
+            }, 2000);
+
+            // Trigger CI server logic after network delay
+            setTimeout(() => {
+                simulateCIProcess(payload);
+            }, 1800);
+        });
+
+        // Initialize terminal with a welcoming message
+        window.onload = () => {
+            logToTerminal("CI 服务器已启动，监听端点 /webhook", "info");
+            logToTerminal("等待来自 Git 系统的异步 POST 请求...", "info");
+        };
+    </script>
+</body>
+</html>

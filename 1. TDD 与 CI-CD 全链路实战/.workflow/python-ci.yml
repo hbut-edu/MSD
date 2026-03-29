@@ -1,0 +1,27 @@
+version: '1.0'
+name: gacha-tdd-pipeline
+displayName: 原神抽卡逻辑 TDD 自动化流水线
+triggers:
+  trigger: auto
+  push:
+    branches:
+      - develop
+stages:
+  - name: stage-ci
+    displayName: 语法与逻辑测试
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@python
+        name: run-pytest
+        displayName: 执行测试拦截
+        pythonVersion: 3.9
+        working-directory: .  # 添加工作目录配置，确保CI/CD能正确找到测试文件
+        commands:
+          # 使用清华源加速依赖安装
+          - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+          # 检查代码规范，阻断严重语法错误
+          - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # 运行 pytest，不通过则流水线标红失败
+          - pytest test_business_logic.py -v
