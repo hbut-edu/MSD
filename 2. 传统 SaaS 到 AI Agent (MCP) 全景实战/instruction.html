@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>传统 SaaS 到 AI Agent (MCP) 全景实战 - 打印版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", "SimHei", sans-serif;
+            line-height: 1.8;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+            font-size: 12pt;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background: white;
+        }
+        h1 {
+            font-size: 20pt;
+            color: #000;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #000;
+            padding-bottom: 10px;
+            page-break-after: avoid;
+        }
+        h2 {
+            font-size: 16pt;
+            color: #000;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 14pt;
+            color: #000;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+        h4 {
+            font-size: 12pt;
+            color: #000;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+        p {
+            margin: 10px 0;
+            text-align: justify;
+        }
+        code {
+            font-family: "Consolas", "Monaco", monospace;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10pt;
+            color: #000;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        pre code {
+            background: none;
+            color: #000;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            font-size: 10pt;
+        }
+        th {
+            background: #e0e0e0;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            page-break-inside: avoid;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .toc h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin: 10px 0;
+        }
+        .toc a {
+            color: #000;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        hr {
+            border: none;
+            border-top: 2px solid #000;
+            margin: 30px 0;
+        }
+        strong {
+            font-weight: bold;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .page {
+                width: 100%;
+                min-height: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            .toc {
+                page-break-after: always;
+            }
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow: visible;
+            }
+            img {
+                max-width: 100% !important;
+                page-break-inside: avoid;
+            }
+            h1, h2, h3, h4 {
+                page-break-after: avoid;
+            }
+            table, pre, .toc {
+                page-break-inside: avoid;
+            }
+            a {
+                text-decoration: none;
+                color: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1>《现代软件开发技术》上机实验手册：传统 SaaS 到 AI Agent (MCP) 全景实战</h1>
+
+        <div class="toc">
+            <h2>目录</h2>
+            <ul>
+                <li><a href="#实验主题">实验主题</a></li>
+                <li><a href="#实验目标">实验目标</a></li>
+                <li><a href="#课程概览">课程概览</a></li>
+                <li><a href="#实验安全注意事项">实验安全注意事项</a></li>
+                <li><a href="#环境准备与验证">环境准备与验证</a></li>
+                <li><a href="#理论基石与架构演进范式">理论基石与架构演进范式</a></li>
+                <li><a href="#Dense模型与MoE模型的对比实验设计">Dense模型与MoE模型的对比实验设计</a></li>
+                <li><a href="#实战演练循序渐进的代码实现">实战演练 —— 循序渐进的代码实现</a></li>
+            </ul>
+        </div>
+
+        <h2 id="实验主题">实验主题</h2>
+        <p>传统 SaaS 到 AI Agent (MCP) 全景实战</p>
+
+        <h2 id="实验目标">实验目标</h2>
+        <ol>
+            <li>理解传统 SaaS 架构与 AI Agent 架构的核心差异</li>
+            <li>掌握 Dense 与 MoE 模型架构的特点和适用场景</li>
+            <li>学会构建原子化业务工具库（Atomic Tools）</li>
+            <li>掌握 MCP (Model Context Protocol) 工具定义规范</li>
+            <li>理解 Agent 核心调度器的工作原理</li>
+            <li>学会实现多工具链式调用（Chain of Actions）</li>
+            <li>掌握自然语言界面（LUI）的构建方法</li>
+            <li>建立 AI 时代软件工程的新思维</li>
+        </ol>
+
+        <h2 id="课程概览">课程概览 (Total: 240 Mins)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>时间段</th>
+                    <th>教学环节</th>
+                    <th>核心目标</th>
+                    <th>关键技术栈</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>0-30</strong></td>
+                    <td><strong>模块一：理论导入</strong></td>
+                    <td>理解 SaaS 与 Agent 架构差异，掌握 Dense vs MoE 架构特点。</td>
+                    <td>理论讲授、架构图解</td>
+                </tr>
+                <tr>
+                    <td><strong>30-70</strong></td>
+                    <td><strong>模块二：环境准备与工具构建</strong></td>
+                    <td>完成 Ollama 本地部署，下载模型，构建原子化业务工具库。</td>
+                    <td>Ollama, Python, pip, 函数式编程</td>
+                </tr>
+                <tr>
+                    <td><strong>70-110</strong></td>
+                    <td><strong>模块三：SaaS 对照组实现</strong></td>
+                    <td>实现传统 SaaS 巨石架构控制器，理解硬编码局限性。</td>
+                    <td>面向对象编程, 耦合设计</td>
+                </tr>
+                <tr>
+                    <td><strong>110-150</strong></td>
+                    <td><strong>模块四：MCP 工具定义与 Agent 调度器</strong></td>
+                    <td>掌握 MCP 工具 Schema，实现 Agent 核心调度器。</td>
+                    <td>JSON Schema, OpenAI API, 链式调用</td>
+                </tr>
+                <tr>
+                    <td><strong>150-190</strong></td>
+                    <td><strong>模块五：双轨对比 UI 与实验观察</strong></td>
+                    <td>构建对比实验 UI，观测 Dense 与 MoE 模型的表现差异。</td>
+                    <td>Gradio, 实验设计, 性能观测</td>
+                </tr>
+                <tr>
+                    <td><strong>190-240</strong></td>
+                    <td><strong>模块六：综合实战与结课</strong></td>
+                    <td>完成综合实验，建立 AI 时代软件工程新思维。</td>
+                    <td>项目实战, 工程化思维</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <h2 id="实验安全注意事项">实验安全注意事项</h2>
+        
+        <div class="warning">
+            <p>在开始实验之前，请仔细阅读并遵守以下安全规定：</p>
+        </div>
+
+        <h3>1. 实验目的限制</h3>
+        <ul>
+            <li>本实验仅用于学术研究和教学目的</li>
+            <li>禁止将实验中涉及的技术用于任何恶意用途</li>
+            <li>实验内容仅供学习，不得用于生产环境</li>
+        </ul>
+
+        <h3>2. 数据安全</h3>
+        <ul>
+            <li>不要在实验中使用真实的敏感数据（密码、密钥、个人信息等）</li>
+            <li>实验使用模拟数据，请勿连接真实生产数据库</li>
+            <li>实验完成后，请清理所有临时文件和日志</li>
+        </ul>
+
+        <h3>3. 资源使用</h3>
+        <ul>
+            <li>注意监控系统资源使用情况，避免系统过载</li>
+            <li>如果内存不足，请关闭其他应用程序</li>
+            <li>合理控制模型调用频率，避免系统资源耗尽</li>
+        </ul>
+
+        <h3>4. 本地模型使用规范</h3>
+        <ul>
+            <li>仅使用授权的模型进行实验</li>
+            <li>不要将下载的模型文件分享给他人</li>
+            <li>注意模型文件大小，确保磁盘空间充足</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="环境准备与验证">环境准备与验证</h2>
+
+        <h3>1. 系统要求</h3>
+        <ul>
+            <li><strong>操作系统</strong>：Windows 10/11、macOS 或 Linux</li>
+            <li><strong>Python 版本</strong>：Python 3.10+</li>
+            <li><strong>内存</strong>：建议 16GB 以上（运行 qwen3.5:35b-a3b 建议 32GB 以上）</li>
+            <li><strong>磁盘空间</strong>：至少 20GB 可用空间（用于存储模型文件）</li>
+            <li><strong>网络</strong>：稳定的互联网连接（用于下载模型）</li>
+        </ul>
+
+        <h3>2. 安装 Ollama</h3>
+
+        <h4>Windows 安装</h4>
+        <ol>
+            <li>访问 Ollama 官网：https://ollama.com/</li>
+            <li>下载 Windows 安装包</li>
+            <li>运行安装程序，按照提示完成安装</li>
+            <li>安装完成后，打开新的终端窗口</li>
+        </ol>
+
+        <h4>macOS 安装</h4>
+        <pre><code># 使用 Homebrew 安装
+brew install ollama
+
+# 或使用官方安装脚本
+curl -fsSL https://ollama.com/install.sh | sh</code></pre>
+
+        <h4>Linux 安装</h4>
+        <pre><code># 使用官方安装脚本
+curl -fsSL https://ollama.com/install.sh | sh</code></pre>
+
+        <h3>3. 验证 Ollama 安装</h3>
+        <pre><code># 检查 Ollama 版本
+ollama --version
+
+# 检查 Ollama 服务状态
+ollama ps</code></pre>
+
+        <div class="success">
+            <p><strong>预期输出：</strong></p>
+            <pre><code>ollama version 0.1.x</code></pre>
+        </div>
+
+        <h3>4. 下载模型</h3>
+        <pre><code># 下载 qwen3.5:9b (Dense 模型，约 6GB)
+ollama pull qwen3.5:9b
+
+# 下载 qwen3.5:35b-a3b (MoE 模型，约 12GB)
+ollama pull qwen3.5:35b-a3b
+
+# 查看已下载的模型
+ollama list</code></pre>
+
+        <div class="success">
+            <p><strong>预期输出：</strong></p>
+            <pre><code>NAME              ID              SIZE      MODIFIED
+qwen3.5:9b        ...             6.2 GB    2 minutes ago
+qwen3.5:35b-a3b   ...             12.1 GB   1 minute ago</code></pre>
+        </div>
+
+        <h3>5. 测试本地模型</h3>
+        <pre><code># 测试 qwen3.5:9b
+ollama run qwen3.5:9b "你好，请用一句话介绍自己。"
+
+# 测试 qwen3.5:35b-a3b
+ollama run qwen3.5:35b-a3b "你好，请用一句话介绍自己。"</code></pre>
+
+        <h3>6. 验证 Python 环境</h3>
+        <pre><code># 检查 Python 版本
+python --version
+
+# 检查 pip 版本
+pip --version</code></pre>
+
+        <div class="success">
+            <p><strong>预期输出：</strong></p>
+            <pre><code>Python 3.10.x
+pip 23.x.x from ... (python 3.10)</code></pre>
+        </div>
+
+        <h3>7. 安装依赖</h3>
+        <pre><code># 安装项目依赖
+pip install gradio openai
+
+# 验证安装
+pip list | findstr "gradio openai"</code></pre>
+
+        <div class="success">
+            <p><strong>预期输出：</strong></p>
+            <pre><code>gradio               4.x.x
+openai               1.x.x</code></pre>
+        </div>
+
+        <h3>8. 验证 Ollama API 连接</h3>
+        <pre><code>from openai import OpenAI
+
+# 初始化 Ollama 客户端（使用 OpenAI 兼容接口）
+client = OpenAI(
+    base_url='http://localhost:11434/v1',
+    api_key='local',
+    timeout=120
+)
+
+# 测试连接
+try:
+    response = client.chat.completions.create(
+        model="qwen3.5:9b",
+        messages=[{"role": "user", "content": "Hello"}],
+        max_tokens=10
+    )
+    print("✅ Ollama API 连接成功")
+    print(f"模型回复: {response.choices[0].message.content}")
+except Exception as e:
+    print(f"❌ Ollama API 连接失败: {e}")</code></pre>
+
+        <div class="success">
+            <p><strong>预期输出：</strong></p>
+            <pre><code>✅ Ollama API 连接成功
+模型回复: Hello! How can I help you today?</code></pre>
+        </div>
+
+        <hr>
+
+        <h2 id="理论基石与架构演进范式">第一部分：理论基石与架构演进范式</h2>
+
+        <p>在过去的二十年里，软件工程的核心是构建"确定性的指令流水线"；而随着大模型技术的爆发，核心正在转向构建"具备意图理解和自主规划能力的智能体网络"。</p>
+
+        <h3>1. 传统 SaaS 架构的瓶颈 (巨石与强耦合)</h3>
+        <p>传统 SaaS 奉行<strong>"人适应机器"</strong>的哲学。开发者在后端编写高度耦合的控制器（Controller），将数据库查询、业务计算、文件导出等步骤用 <code>if-else</code> 死死绑定。</p>
+        <ul>
+            <li><strong>交互局限</strong>：用户必须学习复杂的图形界面（GUI），并在固定的表单中输入严格格式的数据。</li>
+            <li><strong>扩展困境</strong>：每增加一个新功能（例如新增导出 CSV），都需要从前端 UI、路由中间件到后端逻辑进行全链路重构。</li>
+        </ul>
+
+        <h3>2. AI Agent 与 MCP 架构的崛起 (解耦与意图驱动)</h3>
+        <p>AI Agent 架构奉行<strong>"机器适应人"</strong>。软件不再提供固定的业务流水线，而是将核心能力剥离为一个个原子的、独立的<strong>"工具 (Tools)"</strong>。</p>
+        <ul>
+            <li><strong>MCP (Model Context Protocol)</strong>：扮演了标准化神经接口的角色。开发者只需编写一份 JSON 格式的"工具说明书 (Schema)"，大模型就能理解该工具的用途和参数要求。</li>
+            <li><strong>自然语言界面 (LUI)</strong>：大模型作为中枢大脑，直接接收用户的模糊自然语言指令，自主拆解任务、规划路径，并按需调用底层 MCP 工具。</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="Dense模型与MoE模型的对比实验设计">第二部分：Dense 模型与 MoE 模型的对比实验设计</h2>
+
+        <p>在多工具编排（如：查数据 -&gt; 算工资 -&gt; 导出文件）这种长上下文、高逻辑依赖的场景中，基座模型的能力决定了 Agent 的上限。本实验特别设计了针对两种不同架构大模型的对比观察：</p>
+
+        <h3>1. 稠密模型 (Dense Model)：以 <code>qwen3.5:9b</code> 为代表</h3>
+        <ul>
+            <li><strong>架构特点</strong>：每次推理时，模型的所有参数（90 亿）都会被激活并参与计算。</li>
+            <li><strong>实验观察预期</strong>：在单次、简单的工具调用中表现优异。但在"连续多步工具调用（Chain of Actions）"中，由于上下文视窗变长，可能会出现参数提取遗漏、格式幻觉，或者在执行到第三步时忘记了第一步获取的数据。</li>
+        </ul>
+
+        <h3>2. 混合专家模型 (MoE Model)：以 <code>qwen3.5:35b-a3b</code> 为代表</h3>
+        <ul>
+            <li><strong>架构特点</strong>：总参数量更大（350 亿），但在每次推理时，只有部分"专家网络"（约 30 亿参数）被动态激活（Sparse Activation）。</li>
+            <li><strong>实验观察预期</strong>：MoE 架构天生更擅长处理复杂的任务路由和逻辑分发。在多步链式推理中，它能极其稳定地维持"思考 -&gt; 行动 -&gt; 观察"的循环，精准地将上一个工具的输出 JSON 转换为下一个工具的输入参数，极大地降低逻辑断链的概率。</li>
+        </ul>
+
+        <hr>
+
+        <h2 id="实战演练循序渐进的代码实现">第三部分：实战演练 —— 循序渐进的代码实现</h2>
+
+        <p>本环节将实现一个真实的财务业务流：<strong>查询员工名单 -&gt; 计算工资与五险一金 -&gt; 导出 CSV 文件</strong>。我们将代码拆分为 6 个阶段，您可以将其按顺序拼接为一个完整的 <code>app.py</code> 运行。</p>
+
+        <h3>阶段 1：环境初始化与底层数据构建</h3>
+        <p>无论是传统软件还是 AI 智能体，底层的数据资产是永恒不变的。</p>
+
+        <pre><code>import gradio as gr
+import json
+import os
+import time
+import csv
+import tempfile
+import logging
+from datetime import datetime
+from openai import OpenAI
+
+# 配置日志记录
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('agent_orchestrator.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# 1. 初始化 Ollama 客户端（使用 OpenAI 兼容接口）
+try:
+    client = OpenAI(
+        base_url='http://localhost:11434/v1',
+        api_key='local',
+        timeout=120
+    )
+    print("✅ Ollama 客户端初始化成功")
+except Exception as e:
+    print(f"❌ Ollama 客户端初始化失败: {e}")
+    raise
+
+# 2. 模拟底层的核心关系型数据库 (花名册与薪资等级)
+mock_employees = [
+    {"id": "E01", "name": "张三", "level": "L1"},
+    {"id": "E02", "name": "李四", "level": "L2"},
+    {"id": "E03", "name": "王五", "level": "L3"}
+]
+
+mock_salary_levels = {"L1": 10000, "L2": 20000, "L3": 35000}</code></pre>
+
+        <h3>阶段 2：构建原子化业务工具库 (Atomic Tools)</h3>
+        <p>将庞大的业务逻辑解构为纯粹的、无 UI 耦合的 Python 函数。这些就是未来挂载到 MCP 上的核心资产。</p>
+
+        <pre><code># 工具 A：仅负责查询全量员工基础数据
+def get_employee_directory():
+    """返回全公司员工的花名册 JSON"""
+    try:
+        if not mock_employees:
+            return json.dumps({"error": "员工数据为空"}, ensure_ascii=False)
+        return json.dumps(mock_employees, ensure_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": f"查询失败: {str(e)}"}, ensure_ascii=False)
+
+# 工具 B：仅负责算薪与扣税 (不关心数据从哪来，只负责处理传入的 JSON)
+def calculate_payroll_and_tax(employees_json: str):
+    """接收员工 JSON，计算五险一金和实发工资"""
+    try:
+        if not employees_json or not employees_json.strip():
+            return json.dumps({"error": "输入数据为空"}, ensure_ascii=False)
+        
+        try:
+            employees = json.loads(employees_json)
+        except json.JSONDecodeError as e:
+            return json.dumps({"error": f"JSON 解析失败: {str(e)}"}, ensure_ascii=False)
+        
+        if not isinstance(employees, list):
+            return json.dumps({"error": "输入数据格式错误，应为数组"}, ensure_ascii=False)
+        
+        if len(employees) == 0:
+            return json.dumps({"error": "员工列表为空"}, ensure_ascii=False)
+        
+        results = []
+        for emp in employees:
+            if not isinstance(emp, dict):
+                continue
+            if "level" not in emp:
+                emp_result = emp.copy()
+                emp_result["error"] = "缺少 level 字段"
+                results.append(emp_result)
+                continue
+            
+            base_salary = mock_salary_levels.get(emp["level"], 0)
+            if base_salary <= 0:
+                emp_result = emp.copy()
+                emp_result["error"] = f"无效的职级: {emp.get('level')}"
+                results.append(emp_result)
+                continue
+            
+            social_security = base_salary * 0.20
+            tax = max(0, (base_salary - social_security) * 0.05)
+            net_salary = base_salary - social_security - tax
+            
+            emp_result = emp.copy()
+            emp_result.update({
+                "应发工资": base_salary,
+                "五险一金扣除": social_security,
+                "个税扣除": tax,
+                "实发工资": net_salary
+            })
+            results.append(emp_result)
+        
+        if not results:
+            return json.dumps({"error": "没有有效的员工数据"}, ensure_ascii=False)
+            
+        return json.dumps(results, ensure_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": f"计算失败: {str(e)}"}, ensure_ascii=False)
+
+# 工具 C：仅负责将传入的 JSON 写成物理 CSV 文件
+def export_payroll_csv(payroll_json: str):
+    """接收算好工资的 JSON，生成文件并返回系统路径"""
+    try:
+        if not payroll_json or not payroll_json.strip():
+            return json.dumps({"error": "输入数据为空"}, ensure_ascii=False)
+        
+        try:
+            payroll_data = json.loads(payroll_json)
+        except json.JSONDecodeError as e:
+            return json.dumps({"error": f"JSON 解析失败: {str(e)}"}, ensure_ascii=False)
+        
+        if not isinstance(payroll_data, list) or len(payroll_data) == 0:
+            return json.dumps({"error": "工资数据为空或格式错误"}, ensure_ascii=False)
+        
+        filepath = os.path.join(tempfile.gettempdir(), "payroll_report.csv")
+        
+        try:
+            with open(filepath, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=payroll_data[0].keys())
+                writer.writeheader()
+                writer.writerows(payroll_data)
+        except IOError as e:
+            return json.dumps({"error": f"文件写入失败: {str(e)}"}, ensure_ascii=False)
+            
+        return json.dumps({"status": "success", "file_path": filepath, "record_count": len(payroll_data)}, ensure_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": f"导出失败: {str(e)}"}, ensure_ascii=False)</code></pre>
+
+        <h3>阶段 3：构建 SaaS 对照组 (巨石控制器)</h3>
+        <p>展示传统开发的"硬编码"特性：开发者必须规定死输入输出格式，一旦需求变更（例如用户不想导出文件），这套流水线就失效了。</p>
+
+        <pre><code>def saas_generate_payroll_api():
+    """传统 SaaS 后端接口：硬编码的流水线，高度耦合"""
+    try:
+        time.sleep(1) # 模拟系统耗时
+        
+        # 步骤被严格固化，依次执行：查数据 -> 算工资 -> 导出
+        emp_str = get_employee_directory()
+        if "error" in emp_str:
+            raise Exception(emp_str)
+            
+        payroll_str = calculate_payroll_and_tax(emp_str)
+        if "error" in payroll_str:
+            raise Exception(payroll_str)
+            
+        export_result = json.loads(export_payroll_csv(payroll_str))
+        if "error" in export_result:
+            raise Exception(export_result["error"])
+        
+        # 必须针对前端 UI 的表格组件进行特定的二维数组清洗
+        payroll_data = json.loads(payroll_str)
+        table_data = [[d["name"], d["level"], d["应发工资"], d["五险一金扣除"], d["实发工资"]] for d in payroll_data]
+        
+        # 严格返回元组，供前端强绑定渲染
+        return table_data, export_result.get("file_path")
+    except Exception as e:
+        print(f"❌ SaaS 执行失败: {e}")
+        return [[str(e), "", "", "", ""]], None</code></pre>
+
+        <div class="info">
+            <p><strong>预期结果：</strong>执行成功后，将在表格中显示所有员工的工资信息，并生成 CSV 文件。</p>
+        </div>
+
+        <h3>阶段 4：构建 Agent 的"神经接口" (MCP Schema)</h3>
+        <p>这是大模型操控软件的唯一媒介。大模型依靠这段 JSON Schema 动态了解系统的能力边界。</p>
+
+        <pre><code># MCP 标准定义：告诉大模型有哪些工具、如何传递参数
+tools_schema = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_employee_directory",
+            "description": "第一步：获取全公司所有员工的基础数据（包含姓名和职级）。不需要参数。"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculate_payroll_and_tax",
+            "description": "第二步：接收员工基础数据 JSON，计算实发工资。必须在获取员工名单后调用。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "employees_json": {"type": "string", "description": "由 get_employee_directory 返回的 JSON 数据"}
+                },
+                "required": ["employees_json"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "export_payroll_csv",
+            "description": "第三步：将工资详细信息的 JSON 数据导出为 CSV 文件。必须在计算完工资后调用。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "payroll_json": {"type": "string", "description": "由 calculate_payroll_and_tax 返回的工资 JSON"}
+                },
+                "required": ["payroll_json"]
+            }
+        }
+    }
+]</code></pre>
+
+        <h3>阶段 5：Agent 核心调度器 (链式推理中枢)</h3>
+        <p>本段代码是现代 AI 软件工程的灵魂所在。我们通过 <code>while True</code> 循环，赋予了大模型<strong>"反思与继续执行"</strong>的能力，让它能在 Dense 和 MoE 架构下展现真正的规划水平。</p>
+
+        <pre><code>def agent_orchestrator(user_message, history, messages_state, selected_model):
+    """
+    Agent 的大脑调度器。接收用户指令，并根据选择的模型（qwen3.5:9b 或 qwen3.5:35b-a3b）进行推理。
+    """
+    try:
+        logger.info(f"开始处理用户请求: {user_message}, 模型: {selected_model}")
+        
+        # 1. 严格的 System Prompt，框定 Agent 行为规范
+        if not messages_state:
+            messages_state = [{"role": "system", "content": "你是专业的 HR 助手。请自动规划工具调用链完成计算。输出最终结果时，请用 Markdown 表格展示，并附上文件下载路径。"}]
+            logger.info("初始化系统提示词")
+        
+        messages_state.append({"role": "user", "content": user_message})
+        history.append((user_message, f"🤖 [当前引擎: {selected_model}] 正在规划任务流..."))
+        yield history, messages_state
+        
+        # 2. 开启无限循环：这是实现多工具接力 (Chain of Actions) 的核心机制
+        max_iterations = 10
+        iteration = 0
+        
+        while iteration < max_iterations:
+            iteration += 1
+            logger.info(f"开始迭代 {iteration}/{max_iterations}")
+            
+            try:
+                # 向所选模型发起请求，赋予其 tool_choice="auto" 的自主权
+                logger.info(f"调用模型 {selected_model} 进行推理")
+                response = client.chat.completions.create(
+                    model=selected_model, 
+                    messages=messages_state, 
+                    tools=tools_schema, 
+                    tool_choice="auto"
+                )
+                response_msg = response.choices[0].message
+                messages_state.append(response_msg)
+                
+                # 3. 拦截判断：模型是否要求调用底层工具？
+                if response_msg.tool_calls:
+                    logger.info(f"模型请求调用 {len(response_msg.tool_calls)} 个工具")
+                    
+                    for tool_call in response_msg.tool_calls:
+                        func_name = tool_call.function.name
+                        logger.info(f"准备调用工具: {func_name}")
+                        
+                        # 解析模型推理出的参数
+                        try:
+                            func_args = json.loads(tool_call.function.arguments) if tool_call.function.arguments else {}
+                            logger.info(f"工具参数: {func_args}")
+                        except json.JSONDecodeError as e:
+                            logger.warning(f"工具参数解析失败: {e}")
+                            func_args = {}
+                        
+                        # 在前端流式打印当前的执行进度
+                        history[-1] = (user_message, history[-1][1] + f"\n\n> 🛠️ **触发节点**: `{func_name}`")
+                        yield history, messages_state
+                        
+                        # 4. 动态路由：实际执行本地 Python 业务代码
+                        start_time = time.time()
+                        if func_name == "get_employee_directory":
+                            tool_result = get_employee_directory()
+                        elif func_name == "calculate_payroll_and_tax":
+                            tool_result = calculate_payroll_and_tax(employees_json=func_args.get("employees_json", "[]"))
+                        elif func_name == "export_payroll_csv":
+                            tool_result = export_payroll_csv(payroll_json=func_args.get("payroll_json", "[]"))
+                        else:
+                            logger.error(f"未找到指定工具: {func_name}")
+                            tool_result = json.dumps({"error": f"未找到指定工具: {func_name}"})
+                        
+                        execution_time = time.time() - start_time
+                        logger.info(f"工具 {func_name} 执行完成，耗时: {execution_time:.2f}秒")
+                        
+                        # 5. 上下文回注：将物理世界的真实执行结果，作为 Context 塞回给大模型
+                        messages_state.append({
+                            "role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": tool_result
+                        })
+                        logger.info(f"工具结果已回注到上下文")
+                    
+                    # 【重点】遇到 continue 意味着当前循环不退出！大模型会带着新拿到的数据，进入下一轮判断
+                    logger.info("继续下一轮迭代")
+                    continue 
+
+                else:
+                    # 6. 出口条件：当大模型认为所有工具调用完毕，它会输出自然语言总结，此时退出循环
+                    final_text = response_msg.content
+                    logger.info(f"模型输出最终结果: {final_text[:100]}...")
+                    
+                    messages_state.append({"role": "assistant", "content": final_text})
+                    history[-1] = (user_message, final_text)
+                    yield history, messages_state
+                    break 
+                    
+            except Exception as e:
+                logger.error(f"迭代 {iteration} 执行失败: {str(e)}", exc_info=True)
+                error_msg = f"❌ 迭代 {iteration} 执行失败: {str(e)}"
+                history[-1] = (user_message, history[-1][1] + f"\n\n{error_msg}")
+                yield history, messages_state
+                break
+                
+        if iteration >= max_iterations:
+            logger.warning(f"已达到最大迭代次数 {max_iterations}，任务可能未完成")
+            history[-1] = (user_message, history[-1][1] + "\n\n⚠️ 已达到最大迭代次数，任务可能未完成")
+            yield history, messages_state
+            
+        logger.info(f"用户请求处理完成，总迭代次数: {iteration}")
+            
+    except Exception as e:
+        logger.error(f"Agent 调度器执行失败: {str(e)}", exc_info=True)
+        error_msg = f"❌ Agent 调度器执行失败: {str(e)}"
+        history.append((user_message, error_msg))
+        yield history, messages_state</code></pre>
+
+        <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 2px solid #000;">
+            <p style="color: #666; font-size: 10pt;">现代软件开发技术上机实验手册 | 最后更新：2026-03-30</p>
+        </div>
+    </div>
+</body>
+</html>
