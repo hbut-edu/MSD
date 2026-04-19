@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 文件状态机可视化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .state-column {
+            transition: all 0.3s ease;
+            min-height: 400px;
+        }
+        .file-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .git-arrow {
+            position: relative;
+        }
+        .git-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.5rem;
+        }
+        .bg-grid {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const katexOptions = {
+        delimiters: [
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false,
+        strict: false,
+        trust: true
+    };
+
+    let renderTimeout;
+    function safeRender() {
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+            renderMathInElement(document.body, katexOptions);
+        }, 100);
+    }
+
+    renderMathInElement(document.body, katexOptions);
+
+    const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        mutations.forEach((mutation) => {
+            if (mutation.target &&
+                mutation.target.className &&
+                typeof mutation.target.className === 'string' &&
+                mutation.target.className.includes('katex')) {
+                return;
+            }
+            shouldRender = true;
+        });
+
+        if (shouldRender) {
+            safeRender();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    setInterval(() => {
+        const text = document.body.innerText;
+        if (text.includes('\\(') || text.includes('$$')) {
+            safeRender();
+        }
+    }, 2000);
+});
+</script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 bg-grid">
+
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-slate-800 mb-2">Git 文件状态机模拟器</h1>
+            <p class="text-slate-600">理解工作区、暂存区与版本库之间的状态流转</p>
+            <div class="mt-4 inline-block bg-white p-3 rounded-lg shadow-sm border border-slate-200 text-sm">
+                状态转换公式：\[S' = f(S, \text{action})\]
+                其中 \(S \in \{\text{Untracked, Unmodified, Modified, Staged}\}\)
+            </div>
+        </header>
+
+        <!-- Global Controls -->
+        <div class="mb-8 flex justify-center gap-4">
+            <button onclick="createNewFile()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md shadow-md transition-all flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="12 4v16m8-8H4" />
+                </svg>
+                创建新文件 (Untracked)
+            </button>
+            <button onclick="gitCommit()" id="commitBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-md shadow-md transition-all hidden flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                git commit (提交所有暂存文件)
+            </button>
+        </div>
+
+        <!-- State Machine Visualizer -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+            
+            <!-- Untracked -->
+            <div class="flex flex-col">
+                <div class="bg-slate-200 p-3 rounded-t-lg border-b-2 border-slate-300 font-bold text-slate-700 text-center">
+                    未追踪 (Untracked)
+                    <div class="text-[10px] font-normal text-slate-500 uppercase tracking-wider">Working Directory</div>
+                </div>
+                <div id="untracked-zone" class="state-column bg-white/60 p-4 border border-slate-200 rounded-b-lg shadow-inner flex flex-col gap-3">
+                </div>
+            </div>
+
+            <!-- Modified -->
+            <div class="flex flex-col">
+                <div class="bg-amber-100 p-3 rounded-t-lg border-b-2 border-amber-300 font-bold text-amber-800 text-center">
+                    已修改 (Modified)
+                    <div class="text-[10px] font-normal text-amber-600 uppercase tracking-wider">Working Directory</div>
+                </div>
+                <div id="modified-zone" class="state-column bg-white/60 p-4 border border-amber-100 rounded-b-lg shadow-inner flex flex-col gap-3">
+                </div>
+            </div>
+
+            <!-- Staged -->
+            <div class="flex flex-col">
+                <div class="bg-blue-100 p-3 rounded-t-lg border-b-2 border-blue-300 font-bold text-blue-800 text-center">
+                    已暂存 (Staged)
+                    <div class="text-[10px] font-normal text-blue-600 uppercase tracking-wider">Staging Area (Index)</div>
+                </div>
+                <div id="staged-zone" class="state-column bg-white/60 p-4 border border-blue-100 rounded-b-lg shadow-inner flex flex-col gap-3">
+                </div>
+            </div>
+
+            <!-- Unmodified -->
+            <div class="flex flex-col">
+                <div class="bg-emerald-100 p-3 rounded-t-lg border-b-2 border-emerald-300 font-bold text-emerald-800 text-center">
+                    未修改 (Unmodified)
+                    <div class="text-[10px] font-normal text-emerald-600 uppercase tracking-wider">Repository (HEAD)</div>
+                </div>
+                <div id="unmodified-zone" class="state-column bg-white/60 p-4 border border-emerald-100 rounded-b-lg shadow-inner flex flex-col gap-3">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Legend / Info -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm max-w-4xl mx-auto">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                核心逻辑说明
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                <ul class="space-y-2">
+                    <li class="flex items-start gap-2">
+                        <span class="bg-indigo-100 text-indigo-700 px-1.5 rounded font-mono font-bold">git add</span>
+                        <span>将新文件或修改过的文件标记为 <strong>已暂存</strong>。此时文件快照已进入索引区。</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="bg-emerald-100 text-emerald-700 px-1.5 rounded font-mono font-bold">git commit</span>
+                        <span>将所有暂存区的文件永久保存到本地仓库，文件状态回归 <strong>未修改</strong>。</span>
+                    </li>
+                </ul>
+                <ul class="space-y-2">
+                    <li class="flex items-start gap-2 text-amber-700">
+                        <span class="bg-amber-100 px-1.5 rounded font-mono font-bold">Modify</span>
+                        <span>编辑一个已被追踪的文件，其状态会自动变为 <strong>已修改</strong>。</span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-600">
+                        <span class="bg-slate-200 px-1.5 rounded font-mono font-bold text-slate-800">New File</span>
+                        <span>新创建的文件默认是 <strong>未追踪</strong> 的，Git 不会自动管理它。</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let files = [];
+        let fileCounter = 0;
+
+        const STATES = {
+            UNTRACKED: 'untracked',
+            MODIFIED: 'modified',
+            STAGED: 'staged',
+            UNMODIFIED: 'unmodified'
+        };
+
+        function createNewFile() {
+            fileCounter++;
+            const newFile = {
+                id: Date.now(),
+                name: `file_${fileCounter}.txt`,
+                status: STATES.UNTRACKED
+            };
+            files.push(newFile);
+            render();
+        }
+
+        function updateFileStatus(id, newStatus) {
+            files = files.map(f => f.id === id ? { ...f, status: newStatus } : f);
+            render();
+        }
+
+        function removeFile(id) {
+            files = files.filter(f => f.id !== id);
+            render();
+        }
+
+        function gitCommit() {
+            let hasStaged = false;
+            files = files.map(f => {
+                if (f.status === STATES.STAGED) {
+                    hasStaged = true;
+                    return { ...f, status: STATES.UNMODIFIED };
+                }
+                return f;
+            });
+            if (hasStaged) render();
+        }
+
+        function render() {
+            const zones = {
+                [STATES.UNTRACKED]: document.getElementById('untracked-zone'),
+                [STATES.MODIFIED]: document.getElementById('modified-zone'),
+                [STATES.STAGED]: document.getElementById('staged-zone'),
+                [STATES.UNMODIFIED]: document.getElementById('unmodified-zone')
+            };
+
+            // Clear zones
+            Object.values(zones).forEach(z => z.innerHTML = '');
+
+            let stagedCount = 0;
+
+            files.forEach(file => {
+                if (file.status === STATES.STAGED) stagedCount++;
+                
+                const card = document.createElement('div');
+                card.className = `file-card p-3 rounded-lg border bg-white shadow-sm flex flex-col gap-2 border-l-4 ${getStatusColor(file.status)}`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-mono text-sm font-semibold truncate" title="${file.name}">${file.name}</span>
+                        <button onclick="removeFile(${file.id})" class="text-slate-400 hover:text-red-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                        ${getActionButtons(file)}
+                    </div>
+                `;
+                
+                zones[file.status].appendChild(card);
+            });
+
+            // Toggle commit button visibility
+            const commitBtn = document.getElementById('commitBtn');
+            if (stagedCount > 0) {
+                commitBtn.classList.remove('hidden');
+            } else {
+                commitBtn.classList.add('hidden');
+            }
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case STATES.UNTRACKED: return 'border-l-slate-400';
+                case STATES.MODIFIED: return 'border-l-amber-500';
+                case STATES.STAGED: return 'border-l-blue-500';
+                case STATES.UNMODIFIED: return 'border-l-emerald-500';
+                default: return 'border-l-slate-200';
+            }
+        }
+
+        function getActionButtons(file) {
+            let btns = '';
+            const btnClass = "text-[10px] px-2 py-1 rounded transition-colors font-bold uppercase tracking-tight";
+            
+            if (file.status === STATES.UNTRACKED || file.status === STATES.MODIFIED) {
+                btns += `<button onclick="updateFileStatus(${file.id}, '${STATES.STAGED}')" class="${btnClass} bg-blue-600 text-white hover:bg-blue-700">git add</button>`;
+            }
+            
+            if (file.status === STATES.UNMODIFIED || file.status === STATES.STAGED) {
+                btns += `<button onclick="updateFileStatus(${file.id}, '${STATES.MODIFIED}')" class="${btnClass} bg-amber-500 text-white hover:bg-amber-600">编辑文件</button>`;
+            }
+
+            if (file.status === STATES.STAGED) {
+                btns += `<button onclick="updateFileStatus(${file.id}, '${STATES.MODIFIED}')" class="${btnClass} border border-slate-300 text-slate-600 hover:bg-slate-50">reset</button>`;
+            }
+
+            if (file.status === STATES.MODIFIED) {
+                btns += `<button onclick="updateFileStatus(${file.id}, '${STATES.UNMODIFIED}')" class="${btnClass} border border-slate-300 text-slate-600 hover:bg-slate-50">checkout</button>`;
+            }
+
+            return btns;
+        }
+
+        // Initialize with one file
+        createNewFile();
+    </script>
+</body>
+</html>

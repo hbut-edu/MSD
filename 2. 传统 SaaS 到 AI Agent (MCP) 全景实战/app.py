@@ -1,4 +1,3 @@
-import gradio as gr
 import json
 import os
 import time
@@ -6,7 +5,10 @@ import csv
 import tempfile
 import logging
 from datetime import datetime
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
 
 # ==================== 日志配置 ====================
 logging.basicConfig(
@@ -20,16 +22,19 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ==================== 初始化客户端 ====================
-try:
-    client = OpenAI(
-        base_url='http://localhost:11434/v1',
-        api_key='local',
-        timeout=120
-    )
-    print("✅ Ollama 客户端初始化成功")
-except Exception as e:
-    print(f"❌ Ollama 客户端初始化失败: {e}")
-    raise
+client = None
+if OpenAI is not None:
+    try:
+        client = OpenAI(
+            base_url='http://localhost:11434/v1',
+            api_key='local',
+            timeout=120
+        )
+        print("✅ Ollama 客户端初始化成功")
+    except Exception as e:
+        print(f"❌ Ollama 客户端初始化失败: {e}")
+else:
+    print("⚠️ OpenAI 模块不可用，仅测试业务逻辑")
 
 # ==================== 模拟数据 ====================
 mock_employees = [
@@ -298,40 +303,3 @@ def agent_orchestrator(user_message, history, messages_state, selected_model):
         error_msg = f"❌ Agent 调度器执行失败: {str(e)}"
         history.append((user_message, error_msg))
         yield history, messages_state
-
-# ==================== Gradio UI ====================
-with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown("## 💸 现代软件架构实验：SaaS 巨石架构 vs Agent 动态编排")
-    
-    with gr.Row():
-        with gr.Column(scale=1):
-            gr.Markdown("### 🏢 控制组：SaaS (硬编码)")
-            gr.Markdown("> 极度高效，但极度死板。开发者提前锁死了业务流。")
-            
-            saas_btn = gr.Button("🚀 一键执行：生成工资单并下载", variant="primary")
-            saas_table = gr.Dataframe(headers=["姓名", "职级", "应发", "五险一金", "实发"])
-            saas_file = gr.File(label="导出的物理文件")
-            
-            saas_btn.click(fn=saas_generate_payroll_api, inputs=None, outputs=[saas_table, saas_file])
-            
-        with gr.Column(scale=1):
-            gr.Markdown("### 🤖 实验组：Agent (意图驱动)")
-            
-            model_selector = gr.Dropdown(
-                choices=["qwen3.5:9b", "qwen3.5:35b-a3b"], 
-                value="qwen3.5:35b-a3b", 
-                label="🧪 核心变量：选择底层大模型架构 (Dense vs MoE)"
-            )
-            
-            messages_state = gr.State([]) 
-            chatbot = gr.Chatbot(label="Agent 神经推理中枢日志", height=450)
-            chat_input = gr.Textbox(label="自然语言指令", placeholder="输入测试用例：帮我查一下全公司的工资，算好扣税，然后给我个 CSV 文件")
-            
-            chat_input.submit(
-                fn=agent_orchestrator, 
-                inputs=[chat_input, chatbot, messages_state, model_selector], 
-                outputs=[chatbot, messages_state]
-            ).then(lambda: "", None, chat_input)
-
-if __name__ == "__main__":
-    demo.launch()

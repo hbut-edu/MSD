@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 分支流转模型交互学习</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f8fafc; overflow: hidden; }
+        .node { transition: all 0.3s ease; cursor: pointer; }
+        .node:hover { filter: brightness(1.2); }
+        .link { transition: all 0.3s ease; stroke-dasharray: 5; animation: dash 10s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -100; } }
+        .branch-label { font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        canvas { pointer-events: none; }
+    </style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const katexOptions = {
+        delimiters: [
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false,
+        strict: false,
+        trust: true
+    };
+
+    let renderTimeout;
+    function safeRender() {
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+            renderMathInElement(document.body, katexOptions);
+        }, 100);
+    }
+
+    renderMathInElement(document.body, katexOptions);
+
+    const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        mutations.forEach((mutation) => {
+            if (mutation.target &&
+                mutation.target.className &&
+                typeof mutation.target.className === 'string' &&
+                mutation.target.className.includes('katex')) {
+                return;
+            }
+            shouldRender = true;
+        });
+
+        if (shouldRender) {
+            safeRender();
+        }
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    setInterval(() => {
+        const text = document.body.innerText;
+        if (text.includes('\\(') || text.includes('$$')) {
+            safeRender();
+        }
+    }, 2000);
+});
+</script>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="bg-white border-b p-4 flex justify-between items-center shadow-sm">
+        <div>
+            <h1 class="text-xl font-bold text-slate-800">Git 分支流转模型 (Git Flow)</h1>
+            <p class="text-xs text-slate-500">理解 Master 与 Develop 分支的 DAG 拓扑演进</p>
+        </div>
+        <div class="flex gap-4 items-center">
+            <div id="status-indicator" class="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                当前分支: <span id="active-branch-text">master</span>
+            </div>
+            <button onclick="resetSim()" class="text-xs text-slate-400 hover:text-red-500 underline">重置模型</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 relative overflow-hidden flex">
+        
+        <!-- Controls Sidebar -->
+        <aside class="w-64 bg-white border-r p-6 flex flex-col gap-6 z-10 shadow-lg">
+            <section>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">开发操作</h3>
+                <div class="flex flex-col gap-2">
+                    <button onclick="addCommit()" class="w-full py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 active:scale-95 transition text-sm">
+                        Git Commit (新提交)
+                    </button>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">分支管理</h3>
+                <div class="flex flex-col gap-2">
+                    <button id="btn-switch" onclick="toggleBranch()" class="w-full py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 active:scale-95 transition text-sm">
+                        切换到 <span id="inactive-branch-text">develop</span>
+                    </button>
+                    <button id="btn-merge" onclick="mergeDevelop()" class="w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 active:scale-95 transition text-sm hidden">
+                        合并 Develop 到 Master
+                    </button>
+                </div>
+            </section>
+
+            <section class="mt-auto">
+                <div class="p-3 bg-slate-50 rounded-lg text-[11px] text-slate-600 leading-relaxed">
+                    <strong>原理说明:</strong><br>
+                    1. 提交形成 DAG \(G=(V, E)\)<br>
+                    2. 分支本质是名为 Refs 的指针<br>
+                    3. 合并逻辑判断：<br>
+                    \(ff = master \in \text{Ancestors}(develop)\)
+                </div>
+            </section>
+        </aside>
+
+        <!-- Visualization Area -->
+        <div class="flex-1 relative bg-slate-50" id="canvas-container">
+            <!-- Labels -->
+            <div class="absolute top-10 left-10 pointer-events-none">
+                <div class="flex items-center gap-2 mb-12">
+                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span class="text-xs font-bold text-slate-400">MASTER (生产环境)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                    <span class="text-xs font-bold text-slate-400">DEVELOP (开发环境)</span>
+                </div>
+            </div>
+
+            <svg id="git-svg" class="w-full h-full">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="15" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#cbd5e1" />
+                    </marker>
+                </defs>
+                <g id="links-group"></g>
+                <g id="nodes-group"></g>
+                <g id="refs-group"></g>
+            </svg>
+        </div>
+    </main>
+
+    <script>
+        // --- Core Data Model ---
+        let state = {
+            nodes: [],
+            branches: {
+                master: null,
+                develop: null
+            },
+            head: 'master', // which branch is active
+            nodeCounter: 0
+        };
+
+        const SPACING_X = 100;
+        const LANE_Y = {
+            master: 120,
+            develop: 240
+        };
+        const START_X = 150;
+
+        // --- Initialization ---
+        function init() {
+            resetSim();
+        }
+
+        function resetSim() {
+            state.nodeCounter = 0;
+            state.nodes = [];
+            state.branches.develop = null;
+            state.head = 'master';
+            
+            // Create initial commit
+            const root = createNode('Initial Commit', ['master']);
+            state.nodes.push(root);
+            state.branches.master = root.id;
+            
+            render();
+        }
+
+        function createNode(msg, lanes, parents = []) {
+            const id = 'c' + (state.nodeCounter++);
+            // Calculate X based on parent max X
+            let maxX = START_X;
+            if (parents.length > 0) {
+                const parentNodes = state.nodes.filter(n => parents.includes(n.id));
+                maxX = Math.max(...parentNodes.map(n => n.x)) + SPACING_X;
+            } else if (state.nodes.length > 0) {
+                maxX = Math.max(...state.nodes.map(n => n.x)) + SPACING_X;
+            }
+
+            return {
+                id,
+                message: msg,
+                parents,
+                lanes, // ['master'] or ['develop'] or both
+                x: maxX,
+                y: LANE_Y[lanes[0]] // primary lane for visual
+            };
+        }
+
+        // --- Actions ---
+        function addCommit() {
+            const currentRef = state.branches[state.head];
+            const newNode = createNode(
+                `Commit ${state.nodes.length}`, 
+                [state.head], 
+                [currentRef]
+            );
+            
+            state.nodes.push(newNode);
+            state.branches[state.head] = newNode.id;
+            
+            render();
+        }
+
+        function toggleBranch() {
+            if (state.head === 'master') {
+                if (!state.branches.develop) {
+                    // Create develop branch at master's current position
+                    state.branches.develop = state.branches.master;
+                }
+                state.head = 'develop';
+            } else {
+                state.head = 'master';
+            }
+            render();
+        }
+
+        function mergeDevelop() {
+            if (state.head !== 'master' || !state.branches.develop) return;
+
+            const masterId = state.branches.master;
+            const developId = state.branches.develop;
+
+            // Check if Master is ancestor of Develop (Fast-Forward case)
+            if (isAncestor(masterId, developId)) {
+                state.branches.master = developId;
+            } else {
+                // 3-way merge
+                const mergeNode = createNode(
+                    'Merge develop into master',
+                    ['master'],
+                    [masterId, developId]
+                );
+                state.nodes.push(mergeNode);
+                state.branches.master = mergeNode.id;
+            }
+            render();
+        }
+
+        // Ancestry check logic for Git DAG
+        function isAncestor(potentialAncestorId, nodeId) {
+            if (potentialAncestorId === nodeId) return true;
+            const node = state.nodes.find(n => n.id === nodeId);
+            if (!node || node.parents.length === 0) return false;
+            return node.parents.some(pId => isAncestor(potentialAncestorId, pId));
+        }
+
+        // --- Rendering Logic ---
+        function render() {
+            const svg = document.getElementById('git-svg');
+            const nodesGroup = document.getElementById('nodes-group');
+            const linksGroup = document.getElementById('links-group');
+            const refsGroup = document.getElementById('refs-group');
+            
+            // Update UI Texts
+            document.getElementById('active-branch-text').innerText = state.head;
+            document.getElementById('inactive-branch-text').innerText = state.head === 'master' ? 'develop' : 'master';
+            
+            const statusInd = document.getElementById('status-indicator');
+            statusInd.className = `flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${state.head === 'master' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`;
+
+            const mergeBtn = document.getElementById('btn-merge');
+            if (state.head === 'master' && state.branches.develop && state.branches.master !== state.branches.develop) {
+                mergeBtn.classList.remove('hidden');
+            } else {
+                mergeBtn.classList.add('hidden');
+            }
+
+            // Clear groups
+            nodesGroup.innerHTML = '';
+            linksGroup.innerHTML = '';
+            refsGroup.innerHTML = '';
+
+            // 1. Draw Links
+            state.nodes.forEach(node => {
+                node.parents.forEach(pId => {
+                    const parent = state.nodes.find(n => n.id === pId);
+                    if (parent) {
+                        const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        const d = `M ${node.x} ${node.y} C ${node.x - 40} ${node.y}, ${parent.x + 40} ${parent.y}, ${parent.x} ${parent.y}`;
+                        line.setAttribute("d", d);
+                        line.setAttribute("fill", "none");
+                        line.setAttribute("stroke", "#cbd5e1");
+                        line.setAttribute("stroke-width", "2");
+                        line.setAttribute("marker-end", "url(#arrowhead)");
+                        line.setAttribute("class", "link");
+                        linksGroup.appendChild(line);
+                    }
+                });
+            });
+
+            // 2. Draw Nodes
+            state.nodes.forEach(node => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+                g.setAttribute("class", "node");
+
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("r", "14");
+                
+                // Color logic based on which branch "owns" or created the commit visually
+                let color = "#3b82f6"; // master blue
+                if (node.lanes.includes('develop') && !node.lanes.includes('master')) color = "#10b981"; // dev green
+                if (node.parents.length > 1) color = "#6366f1"; // merge purple
+                
+                circle.setAttribute("fill", color);
+                circle.setAttribute("stroke", "white");
+                circle.setAttribute("stroke-width", "3");
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("y", "30");
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("class", "text-[10px] fill-slate-400 font-mono uppercase");
+                text.textContent = node.id;
+
+                g.appendChild(circle);
+                g.appendChild(text);
+                nodesGroup.appendChild(g);
+            });
+
+            // 3. Draw Branch Pointers (Refs)
+            const drawRef = (branchName, color, offset) => {
+                const targetId = state.branches[branchName];
+                if (!targetId) return;
+                const node = state.nodes.find(n => n.id === targetId);
+                
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("transform", `translate(${node.x}, ${node.y + offset})`);
+                
+                // Label background
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", "-35");
+                rect.setAttribute("y", "-10");
+                rect.setAttribute("width", "70");
+                rect.setAttribute("height", "20");
+                rect.setAttribute("rx", "4");
+                rect.setAttribute("fill", color);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("y", "4");
+                text.setAttribute("fill", "white");
+                text.setAttribute("class", "text-[10px] font-bold uppercase");
+                text.textContent = branchName + (state.head === branchName ? " (HEAD)" : "");
+                
+                // Pointer arrow up
+                const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                const polyDir = offset > 0 ? "-10,-10 0,-18 10,-10" : "-10,10 0,18 10,10";
+                poly.setAttribute("points", polyDir);
+                poly.setAttribute("fill", color);
+
+                g.appendChild(rect);
+                g.appendChild(text);
+                g.appendChild(poly);
+                refsGroup.appendChild(g);
+            };
+
+            drawRef('master', '#1e40af', -45);
+            if (state.branches.develop) {
+                drawRef('develop', '#065f46', 45);
+            }
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>

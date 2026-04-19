@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Git版本管理工具实践</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.1.0/github-markdown.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Git版本管理工具实践</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#现代软件开发技术上机实验手册git版本管理工具实践"
+id="toc-现代软件开发技术上机实验手册git版本管理工具实践">《现代软件开发技术》上机实验手册：Git版本管理工具实践</a></li>
+<li><a href="#实验主题" id="toc-实验主题">实验主题</a></li>
+<li><a href="#实验目标" id="toc-实验目标">实验目标</a></li>
+<li><a href="#课程概览-total-240-mins"
+id="toc-课程概览-total-240-mins">📅 课程概览 (Total: 240 Mins)</a></li>
+<li><a href="#资源" id="toc-资源">资源</a></li>
+<li><a href="#目的与意义" id="toc-目的与意义">目的与意义</a>
+<ul>
+<li><a href="#长周期的代码版本控制与备份"
+id="toc-长周期的代码版本控制与备份">长周期的代码版本控制与备份</a></li>
+<li><a href="#代码训练的激励机制"
+id="toc-代码训练的激励机制">代码训练的激励机制</a></li>
+<li><a href="#代码的开放及交流"
+id="toc-代码的开放及交流">代码的开放及交流</a></li>
+</ul></li>
+<li><a href="#代码仓库的创建与配置以gitee为例"
+id="toc-代码仓库的创建与配置以gitee为例">代码仓库的创建与配置（以Gitee为例）</a>
+<ul>
+<li><a href="#方式一配置ssh密钥认证推荐"
+id="toc-方式一配置ssh密钥认证推荐">方式一：配置SSH密钥认证（推荐）</a></li>
+<li><a href="#方式二用户名密码认证简单但安全性较低"
+id="toc-方式二用户名密码认证简单但安全性较低">方式二：用户名密码认证（简单但安全性较低）</a></li>
+</ul></li>
+<li><a href="#ide的配置以idea为例"
+id="toc-ide的配置以idea为例">IDE的配置（以IDEA为例）</a></li>
+<li><a href="#创建.gitignore文件"
+id="toc-创建.gitignore文件">创建.gitignore文件</a>
+<ul>
+<li><a href="#什么是.gitignore文件"
+id="toc-什么是.gitignore文件">什么是.gitignore文件</a></li>
+<li><a href="#创建.gitignore文件-1"
+id="toc-创建.gitignore文件-1">创建.gitignore文件</a></li>
+<li><a href="#使用.gitignore文件"
+id="toc-使用.gitignore文件">使用.gitignore文件</a></li>
+</ul></li>
+<li><a href="#提交代码" id="toc-提交代码">提交代码</a>
+<ul>
+<li><a href="#提交信息规范conventional-commits"
+id="toc-提交信息规范conventional-commits">提交信息规范（Conventional
+Commits）</a></li>
+<li><a href="#方式一ssh密钥认证推荐"
+id="toc-方式一ssh密钥认证推荐">方式一：SSH密钥认证（推荐）</a></li>
+<li><a href="#方式二用户名密码认证"
+id="toc-方式二用户名密码认证">方式二：用户名密码认证</a></li>
+</ul></li>
+<li><a href="#ide的配置以vscode为例"
+id="toc-ide的配置以vscode为例">IDE的配置（以VSCODE为例）</a></li>
+<li><a href="#常用git命令" id="toc-常用git命令">常用Git命令</a>
+<ul>
+<li><a href="#基础命令" id="toc-基础命令">基础命令</a></li>
+<li><a href="#分支操作" id="toc-分支操作">分支操作</a></li>
+<li><a href="#远程操作" id="toc-远程操作">远程操作</a></li>
+</ul></li>
+<li><a href="#两种机制master直接提交与branch合并"
+id="toc-两种机制master直接提交与branch合并">两种机制：master直接提交与branch合并</a></li>
+<li><a href="#创建一个分支branch"
+id="toc-创建一个分支branch">创建一个分支（branch）</a>
+<ul>
+<li><a href="#分支命名规范" id="toc-分支命名规范">分支命名规范</a></li>
+</ul></li>
+<li><a href="#合并分支" id="toc-合并分支">合并分支</a>
+<ul>
+<li><a href="#代码审查标准" id="toc-代码审查标准">代码审查标准</a></li>
+</ul></li>
+<li><a href="#冲突消解" id="toc-冲突消解">冲突消解</a></li>
+<li><a href="#分支保护机制" id="toc-分支保护机制">分支保护机制</a>
+<ul>
+<li><a href="#设置分支保护" id="toc-设置分支保护">设置分支保护</a></li>
+<li><a href="#分支保护的作用"
+id="toc-分支保护的作用">分支保护的作用</a></li>
+</ul></li>
+<li><a href="#最后" id="toc-最后">最后</a>
+<ul>
+<li><a href="#常见问题-faq" id="toc-常见问题-faq">❓ 常见问题 FAQ</a>
+<ul>
+<li><a href="#环境配置相关" id="toc-环境配置相关">环境配置相关</a></li>
+<li><a href="#git操作相关" id="toc-git操作相关">Git操作相关</a></li>
+<li><a href="#分支管理相关" id="toc-分支管理相关">分支管理相关</a></li>
+<li><a href="#ide集成相关" id="toc-ide集成相关">IDE集成相关</a></li>
+<li><a href="#gitee平台相关"
+id="toc-gitee平台相关">Gitee平台相关</a></li>
+<li><a href="#实验报告相关" id="toc-实验报告相关">实验报告相关</a></li>
+<li><a href="#git提交相关" id="toc-git提交相关">Git提交相关</a></li>
+<li><a href="#扩展学习相关" id="toc-扩展学习相关">扩展学习相关</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="现代软件开发技术上机实验手册git版本管理工具实践">《现代软件开发技术》上机实验手册：Git版本管理工具实践</h1>
+<h1 id="实验主题">实验主题</h1>
+<p>Git版本管理工具实践</p>
+<h1 id="实验目标">实验目标</h1>
+<ol type="1">
+<li>理解Git版本控制系统的基本概念和工作原理</li>
+<li>掌握Git常用命令的使用方法</li>
+<li>学会使用Gitee在线代码仓库进行代码管理</li>
+<li>掌握IDEA和VSCODE等IDE与Git的集成配置</li>
+<li>学会创建和使用.gitignore文件</li>
+<li>掌握分支管理策略（创建、合并、冲突消解）</li>
+<li>了解代码审查和分支保护机制</li>
+</ol>
+<h1 id="课程概览-total-240-mins">📅 课程概览 (Total: 240 Mins)</h1>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">时间段</th>
+<th style="text-align: left;">教学环节</th>
+<th style="text-align: left;">核心目标</th>
+<th style="text-align: left;">关键技术栈</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>0-30’</strong></td>
+<td
+style="text-align: left;"><strong>模块一：理论导入与环境准备</strong></td>
+<td
+style="text-align: left;">理解Git版本控制的核心概念，完成Git安装与基础配置。</td>
+<td style="text-align: left;">Git, Gitee, SSH密钥</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>30-70’</strong></td>
+<td
+style="text-align: left;"><strong>模块二：仓库创建与基本操作</strong></td>
+<td
+style="text-align: left;">掌握Gitee仓库创建、克隆、提交、推送等基本操作。</td>
+<td style="text-align: left;">Git Bash, 命令行操作</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>70-110’</strong></td>
+<td
+style="text-align: left;"><strong>模块三：IDE集成与可视化操作</strong></td>
+<td
+style="text-align: left;">学会在IDEA和VSCODE中使用Git进行可视化操作。</td>
+<td style="text-align: left;">IDEA, VSCODE, Git GUI</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>110-150’</strong></td>
+<td
+style="text-align: left;"><strong>模块四：分支管理与冲突消解</strong></td>
+<td
+style="text-align: left;">掌握分支创建、合并、冲突解决的核心流程。</td>
+<td style="text-align: left;">分支策略, 冲突消解</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>150-190’</strong></td>
+<td
+style="text-align: left;"><strong>模块五：团队协作与代码审查</strong></td>
+<td style="text-align: left;">理解团队协作流程，掌握Pull
+Request与代码审查。</td>
+<td style="text-align: left;">Gitee PR, 代码审查</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>190-240’</strong></td>
+<td
+style="text-align: left;"><strong>模块六：综合实战与结课</strong></td>
+<td
+style="text-align: left;">完成综合实战项目，构建完整的Git工作流。</td>
+<td style="text-align: left;">实战项目, 版本管理</td>
+</tr>
+</tbody>
+</table>
+<h1 id="资源">资源</h1>
+<p>git工具官方网站：</p>
+<pre><code>https://git-scm.com/</code></pre>
+<p>在线代码仓库：</p>
+<pre><code>https://github.com/（境外）
+https://gitee.com/（境内）</code></pre>
+<p>离线代码仓库：</p>
+<pre><code>https://gitlab.com/</code></pre>
+<h1 id="目的与意义">目的与意义</h1>
+<p>git一直服务于团队合作的最前沿，但是作为个人开发者使用git工具管理自己的代码和文件也具有非凡的意义。</p>
+<h3 id="长周期的代码版本控制与备份">长周期的代码版本控制与备份</h3>
+<p>版本控制和备份：管理代码的不同版本，可随时恢复到以前的工作状态，避免数据丢失。选择长期且稳定的在线代码仓库至关重要。</p>
+<h3 id="代码训练的激励机制">代码训练的激励机制</h3>
+<p>学习和成长的激励机制：通过查看提交历史，个人开发者可以反思和学习自己的代码变更，了解哪些改动带来了积极或消极的影响。</p>
+<p>学习专业化工作流程：使用Git可以帮助个人开发者养成专业的软件开发习惯，如定期提交、撰写详细的提交信息等，这对职业发展非常有帮助。</p>
+<h3 id="代码的开放及交流">代码的开放及交流</h3>
+<p>共享和协作：即使是个人项目，开发者也可以使用Git轻松地与其他人共享代码，接受建议和反馈，提升项目质量。</p>
+<h1
+id="代码仓库的创建与配置以gitee为例">代码仓库的创建与配置（以Gitee为例）</h1>
+<pre><code>https://gitee.com/</code></pre>
+<p>在本次短学期实习中，我们选择Gitee为例子。</p>
+<p>首先我们需要注册Gitee账号。然后进入
+<code>个人主页 -&gt; 个人设置 -&gt; 邮箱管理</code> 选项中。</p>
+<p><strong>作为重要的第一步，我们需要配置<code>提交邮箱</code>。</strong></p>
+<p>默认情况下，<code>提交邮箱</code>
+在git中扮演身份识别的角色。如下：</p>
+<p><img src="images/8723910f.png" /></p>
+<p>在开始使用Git之前，我们需要先进行Git的基础配置。打开命令行终端（Windows使用Git
+Bash，macOS使用Terminal），执行以下命令配置身份信息：</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 配置用户名</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.name <span class="st">&quot;你的真实姓名&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 配置提交邮箱</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">&quot;你的邮箱@example.com&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 配置默认分支名</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> init.defaultBranch master</span></code></pre></div>
+<p>为了实现安全的免密通信，Git提供了两种主要的认证方式：<strong>SSH密钥认证</strong>（推荐）和<strong>用户名密码认证</strong>。</p>
+<h3 id="方式一配置ssh密钥认证推荐">方式一：配置SSH密钥认证（推荐）</h3>
+<p>SSH密钥认证是一种更安全、更便捷的认证方式，无需每次输入密码。</p>
+<ol type="1">
+<li><strong>生成SSH密钥对</strong>：在本地命令行中执行（一路回车默认即可）：</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">&quot;你的邮箱@example.com&quot;</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><p><strong>查看并复制公钥</strong>：</p>
+<ul>
+<li>Windows: <code>cat ~/.ssh/id_ed25519.pub</code></li>
+<li>macOS: <code>cat ~/.ssh/id_ed25519.pub</code></li>
+</ul></li>
+<li><p><strong>在Gitee中添加公钥</strong>：进入 Gitee
+<code>个人设置 -&gt; SSH公钥</code>，将复制的公钥内容粘贴进去并保存。</p></li>
+<li><p><strong>测试连接</strong>：在命令行中执行：</p></li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-T</span> git@gitee.com</span></code></pre></div>
+<p>如果提示 <code>Welcome to Gitee.com, 你的用户名!</code>
+说明配置成功。</p>
+<h3
+id="方式二用户名密码认证简单但安全性较低">方式二：用户名密码认证（简单但安全性较低）</h3>
+<p>如果不想配置SSH密钥，也可以使用用户名密码进行认证。</p>
+<ol type="1">
+<li><strong>获取个人访问令牌（PAT）</strong>：
+<ul>
+<li>进入 Gitee
+<code>个人设置 -&gt; 安全设置 -&gt; 个人访问令牌</code></li>
+<li>点击
+<code>生成新令牌</code>，勾选必要的权限（projects、user_info等）</li>
+<li>生成后复制保存令牌，只会显示一次</li>
+</ul></li>
+<li><strong>使用方式</strong>：
+<ul>
+<li>克隆仓库时使用HTTPS地址：<code>https://gitee.com/用户名/仓库名.git</code></li>
+<li>推送时用户名输入Gitee用户名，密码输入个人访问令牌</li>
+</ul></li>
+</ol>
+<p><strong>注意</strong>：密码认证存在安全风险，推荐使用SSH密钥认证方式。</p>
+<p>随后，通过右上角菜单打开<code>新建仓库</code>页面。</p>
+<p><img src="images/301e38a6.png" /></p>
+<p>根据自己的需求填写仓库名称、路径等信息。</p>
+<p><img src="images/2fa008ae.png" /></p>
+<p>仓库创建完成后，会返回一个用于管理该仓库的地址信息。复制该信息。</p>
+<p><img src="images/43213f1e.png" /></p>
+<h1 id="ide的配置以idea为例">IDE的配置（以IDEA为例）</h1>
+<p>下载并安装git工具与Intellij IDEA。</p>
+<p>检查git工具在IDEA中的配置是否完备。</p>
+<p>进入IDEA的Settings界面（通过左侧菜单<code>Customize -&gt; All Settings</code>进入）。</p>
+<p>打开<code>Version Control -&gt; Git</code>。</p>
+<p>在<code>Path to Git executable</code>文本框中，找到并填入git.exe的位置。点击Test按钮。</p>
+<p><img src="images/01643ac4.png" /></p>
+<p>回到启动页，选择<code>Get from Version Control</code>。</p>
+<p>输入刚才我们复制的仓库地址信息。点击<code>Clone</code>。</p>
+<p><img src="images/fc7efdb5.png" /></p>
+<p>至此，我们已经完成了在IDEA中配置连接在线代码仓库的过程。</p>
+<h1 id="创建.gitignore文件">创建.gitignore文件</h1>
+<p>在提交代码之前，我们需要创建 <code>.gitignore</code>
+文件，用于自动排除不需要提交到仓库的文件。</p>
+<h3 id="什么是.gitignore文件">什么是.gitignore文件</h3>
+<p>.gitignore文件告诉Git哪些文件或目录不需要被版本控制。这可以避免将IDE配置文件、依赖库、编译产物等提交到仓库，保持仓库的清洁。</p>
+<h3 id="创建.gitignore文件-1">创建.gitignore文件</h3>
+<p>在项目根目录创建 <code>.gitignore</code>
+文件，内容如下（以Java项目为例）：</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Java编译产物</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">*.class</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">*.jar</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">*.war</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">*.ear</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ex">target/</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># IDE配置文件</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="ex">.idea/</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="ex">*.iml</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="ex">*.iws</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="ex">*.ipr</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="ex">.vscode/</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="ex">.vs/</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="ex">*.suo</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="ex">*.user</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 操作系统文件</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="ex">.DS_Store</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="ex">Thumbs.db</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 依赖库</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="ex">lib/</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="ex">*.dll</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="ex">*.so</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="ex">*.dylib</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co"># 日志文件</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="ex">*.log</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="ex">logs/</span></span></code></pre></div>
+<p>可以根据项目类型选择合适的.gitignore模板，例如： - Python项目：添加
+<code>__pycache__/</code>, <code>*.pyc</code>, <code>venv/</code> -
+Node.js项目：添加 <code>node_modules/</code>, <code>npm-debug.log</code>
+- C/C++项目：添加 <code>*.o</code>, <code>*.obj</code>,
+<code>bin/</code>, <code>build/</code></p>
+<h3 id="使用.gitignore文件">使用.gitignore文件</h3>
+<ol type="1">
+<li>在项目根目录创建 <code>.gitignore</code> 文件</li>
+<li>填写需要忽略的文件和目录规则</li>
+<li>将 <code>.gitignore</code> 文件提交到仓库</li>
+</ol>
+<p>这样，Git会自动忽略这些文件，不会将它们提交到仓库。</p>
+<h1 id="提交代码">提交代码</h1>
+<p>接下来，我们完成将本地代码提交到代码仓库的过程。</p>
+<p>首先，我们创建并完成一个文件。在本次实践中，我们创建并使用一个README.md文件作为例子。</p>
+<p>文件的颜色会发生一些变化，白色代表文件与仓库相等，绿色代表新追加的文件，蓝色代表该文件被修改过。</p>
+<p>初次创建文件时，会弹出一个对话框，如下。选择<code>Add</code>。</p>
+<p><img src="images/21c71dd9.png" /></p>
+<p>在我们创建的文件上面，点击右键，选择<code>Git -&gt; Commit File</code>。</p>
+<p><img src="images/f12df998.png" /></p>
+<p>进入Commit界面后，检查我们需要提交的文件。</p>
+<p>为了保证在线仓库的纯洁性，我们只提交和程序和代码相关的文件进入仓库。</p>
+<p>而且尽量不要提交过大的文件。管理大文件并不是git工具所擅长的。</p>
+<p>比如一些IDE的配置文件之类的数据不要提交到仓库。</p>
+<p><strong>最后，不要忘记填写提交说明。</strong></p>
+<h3 id="提交信息规范conventional-commits">提交信息规范（Conventional
+Commits）</h3>
+<p>推荐使用约定式提交规范，使提交历史更加清晰可读：</p>
+<p>格式：<code>&lt;类型&gt;: &lt;描述&gt;</code></p>
+<p>常用类型： - <code>feat: 新功能</code> - 添加新功能 -
+<code>fix: 修复bug</code> - 修复缺陷 - <code>docs: 文档更新</code> -
+仅修改文档 - <code>style: 代码格式</code> - 不影响代码运行的格式修改 -
+<code>refactor: 重构</code> - 既不新增功能也不修复bug的代码修改 -
+<code>test: 测试相关</code> - 添加或修改测试代码 -
+<code>chore: 构建相关</code> - 构建流程或辅助工具的变动</p>
+<p>示例：</p>
+<pre><code>feat: 添加用户登录功能
+fix: 修复登录页面跳转错误
+docs: 更新API文档
+refactor: 重构用户认证逻辑</code></pre>
+<p>良好的提交信息有助于团队协作和代码审查。</p>
+<p><img src="images/f6fc7c97.png" /></p>
+<p>提交代码会改变仓库的内容，所以在这一步中需要验证你的身份。</p>
+<p><strong>身份验证方式：</strong></p>
+<p>根据你选择的认证方式，有两种验证方法：</p>
+<h3 id="方式一ssh密钥认证推荐">方式一：SSH密钥认证（推荐）</h3>
+<p>如果使用SSH密钥认证：不需要输入用户名和密码，直接提交即可。 -
+确保使用SSH地址克隆仓库：<code>git@gitee.com:用户名/仓库名.git</code> -
+确保已正确配置SSH公钥</p>
+<h3 id="方式二用户名密码认证">方式二：用户名密码认证</h3>
+<p>如果使用HTTP认证： - <code>Username</code>填写Gitee用户名 -
+<code>Password</code>填写Gitee的个人访问令牌（PAT）或注册密码 -
+确保使用HTTPS地址克隆仓库：<code>https://gitee.com/用户名/仓库名.git</code></p>
+<p><strong>注意</strong>：密码认证存在安全风险，推荐使用SSH密钥认证方式。</p>
+<p><img src="images/d49c985a.png" /></p>
+<p>如果一切正常，IDE右下角会显示相关信息。</p>
+<p><img src="images/a79eb4cf.png" /></p>
+<p>同时，在Gitee的网站上，也会显示相应的内容。</p>
+<p><img src="images/821e1d30.png" /> <img
+src="images/49347b7c.png" /></p>
+<h1 id="ide的配置以vscode为例">IDE的配置（以VSCODE为例）</h1>
+<p>VSCODE的配置内容和流程基本一致。</p>
+<p>首先，在左侧列表中切换到第三个按钮，代表版本管理。</p>
+<p>然后，在顶部输入框中输入仓库地址。回车后开始克隆仓库内容。</p>
+<p>此时，下载的仓库已经包含我们上面提交过的内容。</p>
+<p><img src="images/34daf4a4.png" /></p>
+<p>在本实践中，我们尝试在VSCODE中修改一下之前的README.md文档，用来测试VSCODE和在线仓库的配置是否完备。</p>
+<p>切换回左侧第一个按钮，打开README.md文档，修改该文档，并<strong>保存</strong>。然后再次切换到第三个按钮处。</p>
+<p>此时，被修改的文档被列在changes列表中，但Commit按钮尚未生效。</p>
+<p><strong>注意：这里和IDEA的流程稍微不一样，我们首先要点击文件右侧的+号，对修改进行暂存（Stage
+Changes）后才能提交。
+这个过程在IDEA中自动完成了，但在VSCODE中需要我们手动完成。</strong></p>
+<p><img src="images/1bd1b455.png" /></p>
+<p>这个时候，<code>Commit</code>按钮生效，可以提交代码了。</p>
+<p>注意：提交代码其实有2个过程，即<code>Commit</code>向本地仓库提交修改，<code>Push</code>将这个修改推送给在线仓库。</p>
+<p>我们可以选择<code>Commit &amp; Push</code>，一次性完成这2个流程。</p>
+<p><img src="images/bee5c159.png" /></p>
+<p>同样的，在Push到在线仓库的时候，需要验证你的身份。根据你选择的认证方式：</p>
+<ul>
+<li><strong>SSH密钥认证（推荐）</strong>：不需要输入用户名和密码，直接提交即可</li>
+<li><strong>用户名密码认证</strong>：使用Gitee用户名和个人访问令牌进行验证</li>
+</ul>
+<p><img src="images/c89cd16d.png" /></p>
+<p>最后，检查一下在线仓库。</p>
+<p><img src="images/2d659a2a.png" /></p>
+<p>除了IDEA和VSCODE之外，市面上的绝大部分IDE都能够与git工具进行很好的连携，完成代码的版本管理工作，例如：</p>
+<p>Android Studio</p>
+<p><img src="images/2239e977.png" /></p>
+<p>Visual Studio</p>
+<p><img src="images/ec5f1fae.png" /></p>
+<p>等等。</p>
+<h1 id="常用git命令">常用Git命令</h1>
+<p>除了IDE操作，了解Git命令行操作也很重要。以下是常用命令：</p>
+<h3 id="基础命令">基础命令</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看仓库状态</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看提交历史</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看简洁的提交历史</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--oneline</span> <span class="at">--graph</span> <span class="at">--all</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看文件变更</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看已暂存的变更</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--cached</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 撤销工作区修改</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">--</span> <span class="op">&lt;</span>文件名<span class="op">&gt;</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 撤销暂存</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> reset HEAD <span class="op">&lt;</span>文件名<span class="op">&gt;</span></span></code></pre></div>
+<h3 id="分支操作">分支操作</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看所有分支</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-a</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 创建并切换分支</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> <span class="op">&lt;</span>分支名<span class="op">&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 切换分支</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="op">&lt;</span>分支名<span class="op">&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 删除本地分支</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-d</span> <span class="op">&lt;</span>分支名<span class="op">&gt;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看分支合并图</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--graph</span> <span class="at">--oneline</span> <span class="at">--all</span></span></code></pre></div>
+<h3 id="远程操作">远程操作</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 查看远程仓库</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote <span class="at">-v</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 获取远程更新</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 拉取并合并远程分支</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 推送本地分支到远程</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin <span class="op">&lt;</span>分支名<span class="op">&gt;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 删除远程分支</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin <span class="at">--delete</span> <span class="op">&lt;</span>分支名<span class="op">&gt;</span></span></code></pre></div>
+<p>掌握这些命令可以帮助你更高效地使用Git。</p>
+<h1
+id="两种机制master直接提交与branch合并">两种机制：master直接提交与branch合并</h1>
+<p>在版本管理中，软件的各个版本的开发犹如一根根线段一样不停的向前发展。而master主线代表代码最<strong>健壮</strong>的，也是最初始默认的发展方向。</p>
+<p>在上面的步骤中，我们演示了一种提交代码的方式，即向<code>master主线</code>直接提交代码的方式。</p>
+<p>这种开发方式简单而直接，适合个人开发者完成个人产品。但也会带来一些风险和不确定性。</p>
+<p>在团队开发或者开源软件开发中，通常我们采用：</p>
+<p><code>创建分支（create branch） -&gt; 基于分支开发 -&gt; 发起合并请求（pull request） -&gt; 合并分支到主线</code></p>
+<p>的基于分支的开发流程。</p>
+<p><img src="images/9fcbf2e7.png" /></p>
+<h1 id="创建一个分支branch">创建一个分支（branch）</h1>
+<h3 id="分支命名规范">分支命名规范</h3>
+<p>推荐使用以下分支命名规范，使分支管理更加清晰：</p>
+<pre><code>feature/xxx    # 新功能分支，例如：feature/user-login
+bugfix/xxx     # 修复bug分支，例如：bugfix/login-error
+hotfix/xxx     # 紧急修复分支，例如：hotfix/security-patch
+release/xxx    # 发布分支，例如：release/v1.0.0
+develop        # 开发主分支
+master/main    # 生产主分支</code></pre>
+<p>示例： - <code>feature/add-payment-method</code> - 添加支付方式功能 -
+<code>bugfix/fix-null-pointer</code> - 修复空指针异常 -
+<code>hotfix/critical-security-fix</code> - 紧急安全修复</p>
+<p>良好的分支命名有助于团队协作和版本管理。</p>
+<p>以IDEA为例，默认情况下，我们在IDE中显示的是master主线代码，但是随着时间的发展，你的主线代码可能不再是最新的了。</p>
+<p>这主要是因为你下载主线代码后，其他的小伙伴又更新了主线代码。</p>
+<p>在创建新的分支的时候，我们首先要保证自身所拥有的代码为最新。</p>
+<p>可以通过pull操作来完成。<code>pull</code> = <code>fetch</code> +
+<code>merge</code>，即先获取远程更新，然后自动合并到本地分支。在本地代码没有修改的情况下，这是安全的。</p>
+<p>如下：</p>
+<p><img src="images/5087fb05.png" /></p>
+<p>在同步了最新代码后，我们基于这个版本创建一个新的branch。</p>
+<p><img src="images/c55fe48a.png" /></p>
+<p>给这个分支一个名字，注意不要和现有的分支名冲突。</p>
+<p>注意保持Checkout
+branch选项为选中，这样在分支创建后，IDE将自动切换到这个分支版本。</p>
+<p><img src="images/8d99c6b4.png" /></p>
+<p>此时，我们可以看到，当前IDE的代码版本已经切换到了version0分支上。</p>
+<p><img src="images/41339220.png" /></p>
+<p>至此，我们的新分支就创建成功了。</p>
+<h1 id="合并分支">合并分支</h1>
+<p>当我们在自己创建的分支辛勤工作并完成了任务后，那么还有最后一个步骤，就是将这个分支合并回master主线。让我们的贡献成为软件未来开发的基石。</p>
+<p>首先，我们仍然像往常一样，提交代码到在线仓库，不过这次我们提交的对象是version0分支，而非master主线。</p>
+<p>然后，我们发起一个<code>Pull Request（合并请求）</code>，在Gitee中也称为<code>Merge Request</code>，告诉并请求管理者请合并version0的代码到master主线。</p>
+<p><img src="images/2dd70184.png" /></p>
+<p>此时，我们切换到Gitee网站上，可以看到有如下信息：</p>
+<p><img src="images/0a279ec4.png" /></p>
+<p>点击<code>创建 Pull Request（合并请求）</code>，在接下来的界面中小心检查<strong>源分支与合并分支</strong>，确保没有错误。然后填写相应的描述信息。</p>
+<p>最后点击<code>创建 Pull Request（合并请求）</code>按钮。</p>
+<p><img src="images/1471bade.png" /></p>
+<p>进入审核界面后，需要测试员和审核员分别审核代码，确保代码不会劣化（之前可以正常运行的测试用例，更新后不能运行的情况）。</p>
+<h3 id="代码审查标准">代码审查标准</h3>
+<p>代码审查是保证代码质量的重要环节，以下是审查清单：</p>
+<h4 id="代码质量">代码质量</h4>
+<ul class="task-list">
+<li><label><input
+type="checkbox" />代码风格符合项目规范（缩进、命名、注释等）</label></li>
+<li><label><input type="checkbox" />没有重复代码或冗余代码</label></li>
+<li><label><input type="checkbox" />代码逻辑清晰，易于理解</label></li>
+<li><label><input
+type="checkbox" />没有硬编码的魔法数字或字符串</label></li>
+<li><label><input type="checkbox" />适当的注释和文档</label></li>
+</ul>
+<h4 id="功能完整性">功能完整性</h4>
+<ul class="task-list">
+<li><label><input type="checkbox" />功能需求完整实现</label></li>
+<li><label><input type="checkbox" />边界条件得到正确处理</label></li>
+<li><label><input type="checkbox" />异常情况有适当处理</label></li>
+<li><label><input type="checkbox" />有相应的测试用例</label></li>
+</ul>
+<h4 id="安全性">安全性</h4>
+<ul class="task-list">
+<li><label><input
+type="checkbox" />没有敏感信息泄露（密码、密钥等）</label></li>
+<li><label><input type="checkbox" />输入验证和数据清洗</label></li>
+<li><label><input
+type="checkbox" />防止SQL注入、XSS等安全漏洞</label></li>
+<li><label><input type="checkbox" />权限控制合理</label></li>
+</ul>
+<h4 id="兼容性">兼容性</h4>
+<ul class="task-list">
+<li><label><input type="checkbox" />不破坏现有功能</label></li>
+<li><label><input type="checkbox" />向后兼容性考虑</label></li>
+<li><label><input type="checkbox" />数据库变更有迁移脚本</label></li>
+</ul>
+<h4 id="性能">性能</h4>
+<ul class="task-list">
+<li><label><input type="checkbox" />没有明显的性能问题</label></li>
+<li><label><input type="checkbox" />避免不必要的数据库查询</label></li>
+<li><label><input type="checkbox" />循环和递归有终止条件</label></li>
+</ul>
+<p>代码审查通过后才能合并到主线。</p>
+<p>因为本例中只有一个分支更新了代码，所以不会出现冲突的情况。而且因为我们的开发者只有一名，所以你需要兼任测试与审核。</p>
+<p>审核和测试完成后，点击<code>合并分支</code>按钮完成代码合并。</p>
+<p><img src="images/e359f539.png" /></p>
+<h1 id="冲突消解">冲突消解</h1>
+<p>在刚才的例子中，我们描述了一种梦幻般的场景，即只有一名开发者开发，维护代码的情况，这种情况比较少见。</p>
+<p>但在更多的场景中，将自己的分支合并到主线中的时候，难免会产生冲突。</p>
+<p>因为是多人协作场景，所以你手上的基于master主线分叉出来的分支很快就会过期，别人添加了更多内容，甚至编辑了你正在编辑的文件。</p>
+<p><strong>当这样的代码尝试合并到master主线的时候，就会产生冲突。</strong></p>
+<p>例如，我们在创建version0的时候，同时创建了version1分支。</p>
+<p>在刚才的version0流程中，我们对README.md文件做了修改，并最终将version0分支合并到了master主线中。</p>
+<p>此时，version1分支的代码将会开始落后于master主线。</p>
+<p>随后，我们同样修改了version1主线中的README.md文件，在其中添加了其他内容。</p>
+<p><img src="images/90aea544.png" /></p>
+<p>结束后，我们试图将version1分支内容合并到master主线中去。这是开发中非常常见的一种场景。</p>
+<p>开发中一些共通的函数库、变量库，总是会被不同的开发小组同时修改。</p>
+<p>但这样的合并将会产生冲突，这是git为了防止代码劣化的措施。</p>
+<p>我们按照刚才的流程，<code>Commit &amp; Push</code>
+version1的代码到在线仓库。</p>
+<p>然后切换到Gitee网站中，创建一个从源分支为<code>version1</code>，合并分支为<code>master</code>的<code>Pull Request（合并请求）</code>。</p>
+<p>然后在评审的界面中，我们发现了这个合并产生了冲突（注意<code>存在冲突</code>红字）。</p>
+<p><img src="images/72d10625.png" /></p>
+<p>我们打开WebIDE，发现README.md文件同时被两个分支所更新。</p>
+<p>version0在前，version1在后。符合我们的流程。</p>
+<p><img src="images/ee1897bf.png" /></p>
+<p>这里有三个选择，接受后来者的更新（当前的更改），不接受后来者的更新（引入的更改），和接受两者的更新。</p>
+<p><img src="images/80ee00d2.png" /></p>
+<p><strong>通过选择并点击其中一项，即可完成冲突的消解。</strong></p>
+<p>这里我们选择接受两者更新。然后点击暂存更改。</p>
+<p><img src="images/fdceb16f.png" /></p>
+<p>最后点击提交。</p>
+<p>这时候，我们回到审核界面，发现存在冲突已经消失，可以正常审核并合并了。</p>
+<p><img src="images/2b707785.png" /></p>
+<p>就这样，冲突消解就完成了。</p>
+<h1 id="分支保护机制">分支保护机制</h1>
+<p>为了防止随意提交到master主线导致代码劣化，我们可以在Gitee中设置分支保护规则。</p>
+<h3 id="设置分支保护">设置分支保护</h3>
+<ol type="1">
+<li>进入仓库主页，点击 <code>设置 -&gt; 保护分支</code></li>
+<li>点击 <code>添加保护分支</code></li>
+<li>选择要保护的分支（通常是 <code>master</code> 或
+<code>main</code>）</li>
+<li>配置以下规则：</li>
+</ol>
+<h4 id="推荐配置">推荐配置</h4>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>不允许直接推送</strong> -
+禁止直接向保护分支推送代码</label></li>
+<li><label><input type="checkbox" /><strong>不允许强制推送</strong> -
+禁止使用 <code>git push --force</code> 覆盖历史</label></li>
+<li><label><input type="checkbox" /><strong>不允许删除分支</strong> -
+防止误删除保护分支</label></li>
+<li><label><input type="checkbox" /><strong>要求合并前通过审核</strong>
+- 必须至少1人审核通过才能合并</label></li>
+<li><label><input type="checkbox" /><strong>要求流水线通过</strong> -
+CI/CD流水线必须通过才能合并</label></li>
+<li><label><input type="checkbox" /><strong>限制合并者</strong> -
+只有指定成员可以合并到保护分支</label></li>
+</ul>
+<h3 id="分支保护的作用">分支保护的作用</h3>
+<ol type="1">
+<li><strong>防止代码劣化</strong> - 所有代码必须经过审核才能合并</li>
+<li><strong>保证代码质量</strong> - 强制代码审查和测试验证</li>
+<li><strong>记录完整历史</strong> - 所有变更都有完整的审核记录</li>
+<li><strong>团队协作规范</strong> - 统一的提交流程和标准</li>
+</ol>
+<p>设置分支保护后，所有开发者都必须通过分支合并请求的方式将代码合并到保护分支，不能直接推送。</p>
+<h1 id="最后">最后</h1>
+<p>通过创建分支并最后合并主线的方式进行代码的版本管理，乍一看比master主线直接提交要复杂和难以理解的多。</p>
+<p>但它却最大程度的保证了提交代码的严肃性，确保了代码审核过程的刚性执行，防止了随意提交导致的代码劣化情况发生。</p>
+<p>在训练有素的程序员中，大家既不想随意提交代码到master导致master主线被劣化或污染，也不想自己的功能模块被别人随意提交的master代码所劣化感染导致测试用例失效。</p>
+<p>所以在修改代码时，创建一个仅属于自己的分支，在自己的分支上尽情的修改、发挥，把代码合并的流程交给代码审核者，完全不需要考虑上述的情景会发生。</p>
+<p>这就是分支管理的魅力所在。</p>
+<hr />
+<h2 id="常见问题-faq">❓ 常见问题 FAQ</h2>
+<h3 id="环境配置相关">环境配置相关</h3>
+<h4 id="q1-git安装失败怎么办">Q1: Git安装失败怎么办？</h4>
+<p><strong>A:</strong> - 检查系统要求：Windows 10/11 -
+确认下载的是Windows版本安装包 - 查看Git官方文档：https://git-scm.com/ -
+检查是否有杀毒软件阻止安装</p>
+<h4 id="q2-git基础配置后不生效">Q2: Git基础配置后不生效？</h4>
+<p><strong>A:</strong> -
+检查配置是否正确：<code>git config --list</code> -
+确认使用了–global参数（全局配置） -
+尝试重新配置：<code>git config --global user.name "你的姓名"</code> -
+重启终端或IDE</p>
+<h4 id="q3-ssh密钥生成失败">Q3: SSH密钥生成失败？</h4>
+<p><strong>A:</strong> - 检查是否已有SSH密钥：<code>ls ~/.ssh/</code> -
+使用ed25519算法：<code>ssh-keygen -t ed25519 -C "你的邮箱"</code> -
+一路回车使用默认设置 - 检查.ssh目录权限</p>
+<hr />
+<h3 id="git操作相关">Git操作相关</h3>
+<h4 id="q4-git克隆仓库失败">Q4: Git克隆仓库失败？</h4>
+<p><strong>A:</strong> - 确认使用正确的SSH地址（git@gitee.com:…） -
+检查SSH密钥是否正确配置 - 尝试使用HTTPS地址克隆 - 检查网络连接是否稳定 -
+测试SSH连接：<code>ssh -T git@gitee.com</code></p>
+<h4 id="q5-git提交时出现身份验证错误">Q5:
+Git提交时出现身份验证错误？</h4>
+<p><strong>A:</strong> -
+确认已配置user.name和user.email：<code>git config --list</code> -
+检查SSH密钥是否正确添加到Gitee -
+尝试重新测试SSH连接：<code>ssh -T git@gitee.com</code> -
+确认使用的是SSH地址而不是HTTPS地址</p>
+<h4 id="q6-git推送失败">Q6: Git推送失败？</h4>
+<p><strong>A:</strong> - 检查是否有提交权限 -
+确认远程仓库地址正确：<code>git remote -v</code> -
+先拉取远程更新再推送：<code>git pull origin master</code> -
+检查网络连接是否正常 - 确认分支名称正确</p>
+<h4 id="q7-git拉取时出现冲突">Q7: Git拉取时出现冲突？</h4>
+<p><strong>A:</strong> - 先查看状态：<code>git status</code> -
+查看冲突文件，寻找
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>、<code>=======</code>、<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>
+标记 - 手动编辑冲突文件，保留需要的内容 -
+添加修改后的文件：<code>git add &lt;文件名&gt;</code> -
+完成合并：<code>git commit</code></p>
+<hr />
+<h3 id="分支管理相关">分支管理相关</h3>
+<h4 id="q8-如何查看所有分支">Q8: 如何查看所有分支？</h4>
+<p><strong>A:</strong> - 查看本地分支：<code>git branch</code> -
+查看所有分支（本地+远程）：<code>git branch -a</code> -
+查看分支详情：<code>git branch -v</code></p>
+<h4 id="q9-如何切换分支">Q9: 如何切换分支？</h4>
+<p><strong>A:</strong> -
+切换到已存在的分支：<code>git checkout &lt;分支名&gt;</code> -
+创建并切换到新分支：<code>git checkout -b &lt;新分支名&gt;</code> -
+查看当前分支：<code>git branch</code>（当前分支前面有*号）</p>
+<h4 id="q10-如何删除分支">Q10: 如何删除分支？</h4>
+<p><strong>A:</strong> -
+删除已合并的本地分支：<code>git branch -d &lt;分支名&gt;</code> -
+强制删除未合并的分支：<code>git branch -D &lt;分支名&gt;</code> -
+删除远程分支：<code>git push origin --delete &lt;分支名&gt;</code></p>
+<h4 id="q11-分支合并时出现冲突">Q11: 分支合并时出现冲突？</h4>
+<p><strong>A:</strong> - 先查看状态：<code>git status</code> -
+打开冲突文件，寻找冲突标记 - 手动编辑文件，选择保留的内容 -
+添加解决冲突后的文件：<code>git add &lt;文件名&gt;</code> -
+完成合并：<code>git commit</code> - 或者使用图形化工具解决冲突</p>
+<hr />
+<h3 id="ide集成相关">IDE集成相关</h3>
+<h4 id="q12-idea中git配置失败">Q12: IDEA中Git配置失败？</h4>
+<p><strong>A:</strong> - 确认Git已正确安装：<code>git --version</code> -
+在IDEA中设置Git路径：<code>File -&gt; Settings -&gt; Version Control -&gt; Git</code>
+- 点击Test按钮测试Git是否可用 - 重启IDEA</p>
+<h4 id="q13-vscode中git不显示">Q13: VSCode中Git不显示？</h4>
+<p><strong>A:</strong> - 确认在Git仓库目录中打开项目 -
+检查左侧源代码管理面板（第三个图标） -
+尝试初始化Git仓库：<code>git init</code> - 重启VSCode</p>
+<h4 id="q14-ide中提交后没有推送到远程">Q14:
+IDE中提交后没有推送到远程？</h4>
+<p><strong>A:</strong> - 检查是否只做了Commit没有Push -
+IDEA：点击提交后选择”Commit and Push” - VSCode：提交后点击同步按钮 -
+或者在命令行手动推送：<code>git push origin &lt;分支名&gt;</code></p>
+<hr />
+<h3 id="gitee平台相关">Gitee平台相关</h3>
+<h4 id="q15-gitee账号无法注册">Q15: Gitee账号无法注册？</h4>
+<p><strong>A:</strong> - 检查网络连接 - 确认邮箱格式正确 -
+检查用户名是否已被占用 - 尝试使用手机号码注册 - 查看Gitee帮助文档</p>
+<h4 id="q16-ssh公钥添加后无法使用">Q16: SSH公钥添加后无法使用？</h4>
+<p><strong>A:</strong> - 确认公钥内容完整复制（从ssh-ed25519开始） -
+测试SSH连接：<code>ssh -T git@gitee.com</code> -
+检查私钥权限：<code>chmod 600 ~/.ssh/id_ed25519</code> -
+尝试重新生成SSH密钥</p>
+<h4 id="q17-pull-request创建失败">Q17: Pull Request创建失败？</h4>
+<p><strong>A:</strong> - 确认源分支和目标分支选择正确 -
+检查分支是否有新的提交 - 确认仓库权限足够 - 尝试刷新页面重新创建 -
+查看Gitee帮助文档</p>
+<h4 id="q18-代码审查如何进行">Q18: 代码审查如何进行？</h4>
+<p><strong>A:</strong> - 在PR页面查看变更内容 - 逐行审查代码，添加评论 -
+检查代码是否符合规范 - 运行测试验证功能 - 批准或请求修改</p>
+<hr />
+<h3 id="实验报告相关">实验报告相关</h3>
+<h4 id="q19-实验步骤可以简化吗">Q19: 实验步骤可以简化吗？</h4>
+<p><strong>A:</strong> -
+核心功能必须完成：Git配置、仓库创建、分支管理、冲突解决 -
+可以根据实际情况调整练习复杂度 - 如遇技术问题，及时向老师或助教求助 -
+在报告中说明遇到的问题和解决方案</p>
+<h4 id="q20-没有gitee账号怎么办">Q20: 没有Gitee账号怎么办？</h4>
+<p><strong>A:</strong> - 可以使用GitHub或GitLab代替 - 基本操作流程类似 -
+在实验报告中说明使用的平台 - 核心是理解Git的工作原理</p>
+<h4 id="q21-代码需要完全自己写吗">Q21: 代码需要完全自己写吗？</h4>
+<p><strong>A:</strong> - 可以参考实验文档中的命令示例 -
+重要的是理解每个命令的作用 - 必须能够解释Git的工作原理 -
+独立完成实验报告</p>
+<h4 id="q22-遇到技术问题无法解决怎么办">Q22:
+遇到技术问题无法解决怎么办？</h4>
+<p><strong>A:</strong> - 先仔细阅读错误信息，尝试自己解决 -
+查看常见问题部分是否有解决方案 - 搜索相关技术文档和教程 -
+向同学请教（但不要直接复制） - 及时向老师或助教求助 -
+在实验报告中说明遇到的问题和尝试的解决方案</p>
+<hr />
+<h3 id="git提交相关">Git提交相关</h3>
+<h4 id="q23-git提交信息怎么写">Q23: Git提交信息怎么写？</h4>
+<p><strong>A:</strong> -
+使用约定式提交规范：<code>&lt;类型&gt;: &lt;描述&gt;</code> -
+常用类型：feat(新功能)、fix(修复)、docs(文档)、style(格式)、refactor(重构)、test(测试)、chore(构建)
+-
+示例：<code>feat: 添加用户登录功能</code>、<code>fix: 修复登录错误</code>
+- 用中文或英文都可以，保持一致即可 - 提交信息要简洁明了</p>
+<h4 id="q24-需要提交多少次commit">Q24: 需要提交多少次commit？</h4>
+<p><strong>A:</strong> - 至少5次有意义的commit -
+建议按照功能模块分阶段提交 - 每次commit对应一个明确的改动 -
+不要把所有代码一次性提交 - 良好的提交历史有助于代码审查和版本回滚</p>
+<hr />
+<h3 id="扩展学习相关">扩展学习相关</h3>
+<h4 id="q25-想深入学习有什么推荐资源">Q25:
+想深入学习，有什么推荐资源？</h4>
+<p><strong>A:</strong> - Git官方文档：https://git-scm.com/doc - Pro
+Git书籍：https://git-scm.com/book/zh/v2 -
+Gitee帮助文档：https://help.gitee.com/ -
+Git相关书籍：《Git权威指南》、《精通Git》 - 在线课程：Git入门与实战</p>
+<h4 id="q26-可以尝试其他git平台吗">Q26: 可以尝试其他Git平台吗？</h4>
+<p><strong>A:</strong> - 当然可以！除了Gitee，还有很多选择 -
+推荐尝试：GitHub、GitLab、Bitbucket等 - 对比不同平台的特点和优势 -
+在实验报告中分享你的发现 - 注意平台功能可能有所不同</p>
+<hr />
+</body>
+</html>
