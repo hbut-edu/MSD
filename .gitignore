@@ -2,18 +2,23 @@
 .DS_Store
 .DS_Store?
 ._*
+.AppleDouble
+.LSOverride
 
 # Python 字节码
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.pyc
+*.pyo
 
 # Virtual environments
 venv/
 env/
 ENV/
 .venv/
+venv37/
 
 # IDE 配置
 .vscode/
@@ -21,30 +26,73 @@ ENV/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
+.settings/
 
 # 测试输出
 htmlcov/
 .coverage
 .pytest_cache/
 .tox/
+.coverage.*
+htmlcov/
 
 # 日志文件
 *.log
-agent_orchestrator.log
+logs/
+*.tmp
 
 # 临时文件
-*.tmp
 *.bak
 *.swp
+*.swo
+*~
+.DS_Store
 
-# CSV 和 JSON 报告（如果不需要版本控制）
-# performance_metrics.csv
-# security_audit.json
-# observability_report.json
-
-# macOS Spotlight
-.AppleDouble
-.LSOverride
-
-# Thumbnail.DB (Windows)
+# Windows 缩略图
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_seeh.db
+
+# 密钥和证书
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+.env
+.env.local
+
+# 编译文件
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.dylib
+
+# 包管理
+node_modules/
+package-lock.json
+yarn.lock
+.npm/
+
+# Git 目录（仅忽略 .git 目录本身，不忽略内容）
+.git/
+
+
+# 构建输出
+dist/
+build/
+target/
+out/
+
+# 本地配置
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
