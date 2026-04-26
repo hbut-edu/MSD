@@ -406,7 +406,7 @@ curl http://localhost:11434/api/tags
 
 ### 2. 核心架构图谱：Dense vs. MoE
 
-在本次实验中，我们将直面两种截然不同的物理架构：
+在本次实验中，同学们将对比两种截然不同的物理架构：
 
 - **Dense（稠密模型，如 Qwen3.5-9B）**：每次生成一个 Token，网络中所有的 90 亿个参数都要被激活并参与一次矩阵乘法计算。**算力需求与模型总大小严格正相关。**
 - **MoE（混合专家模型，如 Qwen3.5-35B-A3B）**：模型总共有 350 亿参数，被划分为多个"专家网络"。推理时，路由器（Router）只会激活最相关的专家（约 30 亿参数，即 A3B）。**总参数量极大（极吃内存），但单次计算量很小（节约算力）。**
@@ -1862,7 +1862,7 @@ def ask_with_guardrails(client, prompt):
             
             # 尝试解析 JSON（如果要求 JSON 格式）
             # 注意：Ollama 可能不完全支持 response_format 参数
-            # 这里我们手动验证
+            # 此处手动验证
             return content
             
         except Exception as e:
@@ -2954,7 +2954,7 @@ python observability_dashboard.py
 
 ### Step 5: 可观测性治理检查清单
 
-在完成上述实战后，请确认您已完成以下内容：
+完成上述实战后，同学们需确认已完成以下内容：
 
 - [ ] 创建并运行了 `observability_performance.py`，理解 TTFT、TPOT 等指标
 - [ ] 创建并运行了 `observability_quality.py`，掌握 LLM-as-Judge 评估方法
@@ -3133,8 +3133,8 @@ pip uninstall -y openai
 #### 2. AI 辅助编程反思
 
 - 简述使用 Trae IDE 生成可观测性治理代码的体验（200-300 字）
-- AI 辅助开发如何改变了你对可观测性治理的理解？
-- 你认为 AI 辅助编程在 LLMOps 可观测性中的优势和局限性是什么？
+- AI 辅助开发如何改变了同学们对可观测性治理的理解？
+- 结合个人理解，说明 AI 辅助编程在 LLMOps 可观测性中的优势和局限性。
 
 #### 3. 自定义可观测性指标扩展
 

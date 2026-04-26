@@ -131,7 +131,7 @@ ollama pull qwen3.5:9b
 
 ## 🎓 学习要点
 
-通过本实验，您将学习：
+通过本实验，同学们将学习：
 - 传统 SaaS 架构与 AI Agent 架构的差异
 - Dense 模型与 MoE 模型的对比
 - MCP 工具定义规范

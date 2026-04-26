@@ -45,7 +45,7 @@ OpenClaw 与多模型智能体网关部署——理解基础设施即代码 (IaC
 ## 💡 为什么要学习 OpenClaw？
 
 ### 1. 理解现代 AI 网关架构
-OpenClaw 是一个典型的**多模型智能体网关**，通过学习它，你可以理解：
+OpenClaw 是一个典型的**多模型智能体网关**，通过学习它，同学们可以理解：
 - 如何将不同来源的模型（云端/本地）统一管理
 - 如何通过声明式配置（Declarative Configuration）管理复杂系统
 - 如何实现企业级 IM 与大模型的端到端智能路由
@@ -57,7 +57,7 @@ OpenClaw 采用了合理的默认配置（约定优于配置原则）：
 - 大幅降低入门和使用门槛
 
 ### 3. 实践"基础设施即代码"
-通过 OpenClaw，你可以亲身感受 **Infrastructure as Code (IaC)** 的威力：
+通过 OpenClaw，同学们可以体验 **Infrastructure as Code (IaC)** 的威力：
 - 所有配置都存储在 YAML/JSON 文件中
 - 配置可版本控制、可复制、可迁移
 - 一键部署成百上千个网关实例
@@ -173,7 +173,7 @@ OpenClaw 采用了合理的默认配置（约定优于配置原则）：
 ### 2. 基础环境安装与确认
 
 #### Windows 用户：使用 winget 安装（推荐）
-如果你使用 Windows 10/11，可以使用系统自带的包管理器 `winget` 快速安装：
+如果同学使用 Windows 10/11，可以使用系统自带的包管理器 `winget` 快速安装：
 
 ```powershell
 # 安装 Python 3.11
@@ -231,7 +231,7 @@ curl -fsSL https://openclaw.ai/install.sh | bash
 | I understand this is personal-by-default and shared/multi-user use requires lock-down. Continue? | 选择 **"Yes"** |
 | Setup mode | 选择 **"QuickStart"** |
 | Model/auth provider | 选择 **"Volcano Engine"** |
-| Enter Volcano Engine API key | 填入你的火山引擎 API Key |
+| Enter Volcano Engine API key | 填入同学自己的火山引擎 API Key |
 | Default model | 选择 **"volcengine-plan/ark-code-latest"** |
 | Select channel (QuickStart) | 选择 **"Skip for now"**（后续配置） |
 | Configure skills now? (recommended) | 选择 **"No"** |
@@ -287,7 +287,7 @@ ark-helper
 
 ## 第一阶段：OpenClaw 安装方式补充
 
-**注意**：官方一键安装方式已在"环境准备与验证"部分提供。如果你已经使用官方脚本安装，可以直接跳至"第二阶段"。
+**注意**：官方一键安装方式已在"环境准备与验证"部分提供。如果已经使用官方脚本安装，可以直接跳至“第二阶段”。
 
 以下提供 pip 安装方式作为备选方案：
 
@@ -298,7 +298,7 @@ ark-helper
 #### 1. Python 虚拟环境创建与激活
 
 **Windows 环境**：
-在你的 D 盘或 E 盘创建一个全英文的实验目录（例如 `D:\AgentOps_Lab`）。在该目录下打开 PowerShell：
+在同学电脑的 D 盘或 E 盘创建一个全英文的实验目录（例如 `D:\AgentOps_Lab`）。在该目录下打开 PowerShell：
 ```powershell
 python -m venv openclaw-env
 .\openclaw-env\Scripts\activate
@@ -317,7 +317,7 @@ openclaw --version  # 验证安装是否成功
 ```
 
 #### 3. Ollama 沙箱安装体验（可选）
-如果你不想配 Python 环境，其实还可以利用大模型引擎直接拉取工具包。你可以新开一个普通终端尝试：
+如果暂不配置 Python 环境，其实还可以利用大模型引擎直接拉取工具包。可新开一个普通终端尝试：
 ```bash
 ollama run openclaw
 ```
@@ -328,11 +328,11 @@ ollama run openclaw
 
 ## 第二阶段：网关 (Gateway) 启动与架构体验
 
-网关是 Agent 系统的交通枢纽。我们将在这里体验默认配置的便捷性。
+网关是 Agent 系统的交通枢纽。本阶段将体验默认配置的便捷性。
 
 ### 1. 参数化配置与启动
 
-我们不需要配置 IP 和端口，框架已经约定好了默认值。我们只显式声明需要覆盖的配置（开启 Debug 方便查错）：
+无需配置 IP 和端口，框架已经约定好了默认值。这里只显式声明需要覆盖的配置（开启 Debug 方便查错）：
 ```bash
 openclaw configure gateway --log-level debug
 openclaw start
@@ -360,7 +360,7 @@ openclaw configure
 在第二个终端中，使用完整的 CLI 命令进行配置注入：
 ```bash
 # 1. 注册火山引擎作为供应商
-openclaw configure provider add --name volcengine-provider --base-url "https://ark.volces.com/api/v3" --api-key "填入你的火山API_KEY"
+openclaw configure provider add --name volcengine-provider --base-url "https://ark.volces.com/api/v3" --api-key "填入同学自己的火山 API_KEY"
 
 # 2. 挂载 Agent 1，注意 --model 后面跟的是 Endpoint ID！
 openclaw configure agent add --name agent-doubao \
@@ -374,7 +374,7 @@ openclaw configure agent add --name agent-doubao \
 
 **👨‍🏫 架构思考**：为什么这里配置模型时不写 `Doubao-Seed-2.0-Code`，而是必须填 `ep-xxxx` 这个乱码一样的端点 ID？
 
-*解析*：因为在企业级云环境中，基础模型是被共享的。你创建 Endpoint 相当于在云端划分了你专属的计算资源配额（TPS/RPM）。网关只认资源端点，不认模型名字。
+*解析*：因为在企业级云环境中，基础模型是被共享的。创建 Endpoint 相当于在云端划分专属的计算资源配额（TPS/RPM）。网关只认资源端点，不认模型名字。
 
 **验证**：
 ```bash
@@ -387,7 +387,7 @@ openclaw cli chat --agent agent-doubao -m "写一段Python的冒泡排序"
 
 ## 第四阶段：配置飞书 WebSocket 通信通道
 
-为了让不在同一局域网的设备也能和我们的网关通信，我们需要接入企业级 IM（飞书）。
+为了让不在同一局域网的设备也能与本地网关通信，本实验需要接入企业级 IM（飞书）。
 
 ### 1. 飞书后台基础配置
 
@@ -397,7 +397,7 @@ openclaw cli chat --agent agent-doubao -m "写一段Python的冒泡排序"
 
 ### 2. 配置网关通道
 
-回到我们的第二个终端，执行通道打通命令：
+回到第二个终端，执行通道打通命令：
 ```bash
 openclaw configure channel add --name feishu-ws \
   --type feishu \
@@ -406,11 +406,11 @@ openclaw configure channel add --name feishu-ws \
   --mode websocket
 ```
 
-**验证**：切回运行着 `openclaw start` 的第一个终端。观察 Debug 日志，只要刷出一行类似 `[Channel] Feishu WebSocket connected successfully` 的字样，说明你的电脑与飞书云端建立了双向隧道！
+**验证**：切回运行着 `openclaw start` 的第一个终端。观察 Debug 日志，只要刷出一行类似 `[Channel] Feishu WebSocket connected successfully` 的字样，说明同学电脑与飞书云端建立了双向隧道！
 
 ### 3. 现代开发者体验 (DX)（可选）
 
-如果嫌复制 App Secret 麻烦，你可以敲入无参数的 `openclaw configure channel`，选择 Feishu 后，终端往往会打印出一个二维码。用飞书手机端扫码，网关会自动完成 OAuth 鉴权。这在工业界被称为"现代 DX 体验提升"。
+如果复制 App Secret 不便，可敲入无参数的 `openclaw configure channel`，选择 Feishu 后，终端往往会打印出一个二维码。用飞书手机端扫码，网关会自动完成 OAuth 鉴权。这在工业界被称为"现代 DX 体验提升"。
 
 ---
 
@@ -424,7 +424,7 @@ openclaw configure channel add --name feishu-ws \
    * `获取单聊消息 (im:message.p2p_msg:readonly)`
 3. 点击"创建版本" -> "发布"。
 
-**验证**：打开飞书 PC 客户端，搜索你创建的机器人，发一句"你好"。此时去盯住你本地的 `openclaw start` 终端，屏幕上一定会闪过一大段 JSON 代码（Message Payload）。这证明消息已经抵达你的电脑了。
+**验证**：打开飞书 PC 客户端，搜索已创建的机器人，发一句"你好"。此时观察本地的 `openclaw start` 终端，屏幕上一定会闪过一大段 JSON 代码（Message Payload）。这证明消息已经抵达同学电脑。
 
 ---
 
@@ -458,7 +458,7 @@ openclaw cli chat --agent agent-qwen -m "用中文介绍一下你自己"
 
 ## 第七阶段：配置网关路由 (Router) 与端到端验收
 
-这是最核心的一步：网关就像一个调度员，需要根据你的命令前缀，将飞书的消息分发给刚才建好的两个 Agent。
+这是最核心的一步：网关就像一个调度员，需要根据消息中的命令前缀，将飞书的消息分发给刚才建好的两个 Agent。
 
 ### 1. 路由分发配置
 
@@ -469,13 +469,13 @@ openclaw configure router add --prefix "/chat" --target agent-qwen
 
 ### 2. 端到端验收 (终测)
 
-在飞书客户端，向你的机器人发送以下两条消息：
+在飞书客户端，向已创建的机器人发送以下两条消息：
 1. `@机器人 /code 帮我用Java写一个线程安全的单例模式`
 2. `@机器人 /chat 请用30个字解释一下什么是现代软件开发`
 
 **验收标准**：
 * 指令 1 应该迅速返回，且代码在飞书中呈现漂亮的**黑底 Markdown 代码块**排版。
-* 指令 2 应该会稍微慢一点（取决于你机房电脑的显卡算力），并在本地终端引发一波日志刷屏，最终将结果返回飞书。
+* 指令 2 应该会稍微慢一点（取决于机房电脑的显卡算力），并在本地终端引发一波日志刷屏，最终将结果返回飞书。
 
 ---
 
@@ -483,13 +483,13 @@ openclaw configure router add --prefix "/chat" --target agent-qwen
 
 ### 1. 揭开魔法的面纱
 
-在你的实验文件夹中，找到自动生成的 `config.yaml`（或 `.openclaw/config.yaml`）。用 VS Code 或记事本打开它。
+在同学的实验文件夹中，找到自动生成的 `config.yaml`（或 `.openclaw/config.yaml`）。用 VS Code 或记事本打开它。
 
-**观察**：你会发现，刚才敲下的所有 `--name`、`--temperature`、`--prefix`，全部严丝合缝地转化为了这个 YAML 文件中的树状结构。
+**观察**：同学们会发现，刚才敲下的所有 `--name`、`--temperature`、`--prefix`，全部严丝合缝地转化为了这个 YAML 文件中的树状结构。
 
 ### 2. 课后总结
 
-当你在企业里进行 CI/CD（持续集成与交付）时，没有任何界面可以让你去点"下一步"，也没有手机让你去扫二维码。你只需要把这个写满命令的脚本跑一遍，或者直接把这个 `config.yaml` 推送到服务器，成百上千台网关就能在 1 秒内配置完毕。这就是**基础设施即代码**的暴力美学，也是这堂实验课希望赋予你们的最重要的工程思维。
+在企业里进行 CI/CD（持续集成与交付）时，没有任何界面用于点击“下一步”，也不依赖手机扫码。只需把这个写满命令的脚本跑一遍，或者直接把这个 `config.yaml` 推送到服务器，成百上千台网关就能在 1 秒内配置完毕。这就是**基础设施即代码**的暴力美学，也是本实验希望同学们形成的最重要的工程思维。
 
 ---
 
@@ -655,7 +655,7 @@ openclaw configure router add --prefix "/chat" --target agent-qwen
 - 尽量完成核心步骤（网关启动、至少一个 Agent 配置、路由配置）
 - 在实验报告中说明遇到的问题和尝试的解决方案
 - 可以截图展示已完成的部分
-- 向老师或助教求助，争取完成后续步骤
+- 向任课教师或助教求助，争取完成后续步骤
 
 #### Q18: 可以参考哪些额外资源？
 **A:**
