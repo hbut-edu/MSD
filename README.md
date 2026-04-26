@@ -24,7 +24,35 @@
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
-└── 4. AgentOps工业实战：多模型智能体网关部署/
+├── 4. AgentOps工业实战：多模型智能体网关部署/
+│   ├── instruction.md
+│   ├── 实验报告提交及评分标准.md
+│   └── 附件/
+├── <编辑中>5. 特征词工程与结构化意图解析/
+│   ├── instruction.md
+│   ├── 实验报告提交及评分标准.md
+│   └── 附件/
+├── <编辑中>6. Harness工程与Agent安全护栏/
+│   ├── instruction.md
+│   ├── 实验报告提交及评分标准.md
+│   └── 附件/
+├── <编辑中>7. 轻量级异步并发与Token成本控制/
+│   ├── instruction.md
+│   ├── 实验报告提交及评分标准.md
+│   └── 附件/
+├── <编辑中>8. 本地RAG与长期记忆系统/
+│   ├── instruction.md
+│   ├── 实验报告提交及评分标准.md
+│   └── 附件/
+├── <编辑中>9. 多Agent状态机协作与工作流编排/
+│   ├── instruction.md
+│   ├── 实验报告提交及评分标准.md
+│   └── 附件/
+├── <编辑中>10. AI应用API化与轻量级全栈交付/
+│   ├── instruction.md
+│   ├── 实验报告提交及评分标准.md
+│   └── 附件/
+└── <编辑中>11. EDD评估驱动开发与AI系统安全伦理/
     ├── instruction.md
     ├── 实验报告提交及评分标准.md
     └── 附件/
@@ -39,7 +67,14 @@
 | 1 | [TDD 与 CI-CD 全链路实战](<1. TDD 与 CI-CD 全链路实战/instruction.md>) | 本地开发环境、Gitee 仓库、CI/CD 配置、测试驱动开发与实验总结 | 240 分钟 |
 | 2 | [传统 SaaS 到 AI Agent (MCP) 全景实战](<2. 传统 SaaS 到 AI Agent (MCP) 全景实战/instruction.md>) | Ollama、Qwen3.5、本地模型调用、MCP 工具抽象、Gradio 交互界面 | 240 分钟 |
 | 3 | [LLMOps 工业实战：从模型部署到可观测性治理](<3. LLMOps 工业实战：从模型部署到可观测性治理/instruction.md>) | 本地模型部署、A/B 测试、提示词注入、MCP 工具调用、护栏评估、可观测性治理 | 300 分钟 |
-| 4 | [AgentOps 工业实战：多模型智能体网关部署](<4. AgentOps工业实战：多模型智能体网关部署/instruction.md>) | OpenClaw、云端与本地智能体接入、飞书通道、Router 路由、配置落盘与验收 | 240 分钟 |
+| 4 | [AgentOps 工业实战：多模型智能体网关部署](<4. AgentOps工业实战：多模型智能体网关部署/instruction.md>) | OpenClaw、云端与本地智能体接入、飞书通道、Router 路由、Skill/MCP 与配置落盘 | 240 分钟 |
+| 5 | [编辑中：特征词工程与结构化意图解析](<%3C编辑中%3E5. 特征词工程与结构化意图解析/instruction.md>) | 特征词提取、需求降噪、意图分类、JSON 任务单、结构化输出校验 | 240 分钟 |
+| 6 | [编辑中：Harness 工程与 Agent 安全护栏](<%3C编辑中%3E6. Harness工程与Agent安全护栏/instruction.md>) | 工具白名单、路径边界、参数校验、失败反馈、审计日志、安全 Skill 设计 | 240 分钟 |
+| 7 | [编辑中：轻量级异步并发与 Token 成本控制](<%3C编辑中%3E7. 轻量级异步并发与Token成本控制/instruction.md>) | asyncio 并发、超时重试、Token 估算、成本统计、限流器与压测 | 240 分钟 |
+| 8 | [编辑中：本地 RAG 与长期记忆系统](<%3C编辑中%3E8. 本地RAG与长期记忆系统/instruction.md>) | 文档切分、简化向量检索、Top-K 召回、上下文拼接、资料外拒答 | 240 分钟 |
+| 9 | [编辑中：多 Agent 状态机协作与工作流编排](<%3C编辑中%3E9. 多Agent状态机协作与工作流编排/instruction.md>) | 程序员/审查员/测试员 Agent、状态机路由、有限重试、流转日志 | 240 分钟 |
+| 10 | [编辑中：AI 应用 API 化与轻量级全栈交付](<%3C编辑中%3E10. AI应用API化与轻量级全栈交付/instruction.md>) | FastAPI、REST 接口、Token 鉴权、前端调用、Skill/API 契约、Docker 本地交付 | 240 分钟 |
+| 11 | [编辑中：EDD 评估驱动开发与 AI 系统安全伦理](<%3C编辑中%3E11. EDD评估驱动开发与AI系统安全伦理/instruction.md>) | 评估样本集、Evaluator、注入攻击测试、敏感信息脱敏、伦理反思 | 240 分钟 |
 
 ## 文件约定
 
@@ -68,6 +103,7 @@
 - Ollama 与 Qwen3.5 系列模型。
 - Gradio、MCP SDK、OpenAI 兼容接口客户端。
 - OpenClaw、飞书开放平台、火山引擎豆包相关配置。
+- FastAPI、Uvicorn、Docker、`asyncio`、本地 RAG 与轻量级评估脚本。
 
 具体版本、安装方式和验证命令以各主题 `instruction.md` 中的要求为准。
 
@@ -77,4 +113,3 @@
 - 更新模型、SDK、平台控制台或命令行工具时，应同步检查实验步骤、截图描述和 FAQ。
 - 生成课件、演示网页或示例代码后，优先放入对应主题的 `附件/`。
 - 发布给学生前，建议检查 Markdown 链接、代码块闭合、评分标准和安全提示是否完整。
-

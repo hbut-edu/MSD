@@ -1,0 +1,707 @@
+<h1
+id="现代软件开发技术上机实验手册多模型智能体网关部署实战以-openclaw-为例">《现代软件开发技术》上机实验手册：多模型智能体网关部署实战，以
+OpenClaw 为例</h1>
+<hr />
+<h2 id="实验主题">实验主题</h2>
+<p>OpenClaw 与多模型智能体网关部署——理解基础设施即代码 (IaC)</p>
+<h2 id="实验目标">实验目标</h2>
+<ol type="1">
+<li>理解”基础设施即代码 (IaC)“现代工程范式</li>
+<li>掌握如何利用 OpenClaw 搭建本地网关</li>
+<li>学会通过 WebSocket 实现与云端服务的实时双向通信</li>
+<li>实现企业级 IM（飞书）与云端/本地大模型的端到端智能路由</li>
+<li>掌握 Provider、Agent、Channel、Router 的声明式配置方法</li>
+<li>建立本地网关与云端服务的安全连接思维</li>
+</ol>
+<h2 id="课程概览-total-240-mins">📅 课程概览 (Total: 240 Mins)</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">时间段</th>
+<th style="text-align: left;">教学环节</th>
+<th style="text-align: left;">核心目标</th>
+<th style="text-align: left;">关键技术栈</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>0-30’</strong></td>
+<td style="text-align: left;"><strong>阶段一：OpenClaw
+安装方式补充</strong></td>
+<td style="text-align: left;">建立实验目录，完成 Python 虚拟环境与
+OpenClaw 安装验证。</td>
+<td style="text-align: left;">Python, venv, pip</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>30-60’</strong></td>
+<td
+style="text-align: left;"><strong>阶段二：网关启动与架构体验</strong></td>
+<td style="text-align: left;">启动 OpenClaw
+网关，理解默认配置与本地服务边界。</td>
+<td style="text-align: left;">OpenClaw Gateway, Debug 日志</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>60-90’</strong></td>
+<td
+style="text-align: left;"><strong>阶段三：接入云端智能体</strong></td>
+<td
+style="text-align: left;">配置火山引擎豆包模型，完成云端模型链路验证。</td>
+<td style="text-align: left;">Volcengine Ark, Provider, Agent</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>90-120’</strong></td>
+<td style="text-align: left;"><strong>阶段四：飞书 WebSocket
+通道</strong></td>
+<td style="text-align: left;">配置飞书
+Channel，建立本地网关与飞书云端的双向连接。</td>
+<td style="text-align: left;">Feishu, WebSocket, OAuth</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>120-150’</strong></td>
+<td
+style="text-align: left;"><strong>阶段五：机器人最小特权配置</strong></td>
+<td
+style="text-align: left;">配置机器人权限，验证消息从飞书抵达本地网关。</td>
+<td style="text-align: left;">飞书开放平台, 权限控制</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>150-180’</strong></td>
+<td
+style="text-align: left;"><strong>阶段六：接入本地离线智能体</strong></td>
+<td style="text-align: left;">接入 Ollama
+本地模型，理解本地模型与云端模型的资源差异。</td>
+<td style="text-align: left;">Ollama, Qwen3.5, Local Agent</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>180-210’</strong></td>
+<td
+style="text-align: left;"><strong>阶段七：路由与端到端验收</strong></td>
+<td style="text-align: left;">配置 Router 规则，完成云端/本地 Agent
+的端到端消息分发。</td>
+<td style="text-align: left;">Router, E2E Test</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>210-240’</strong></td>
+<td style="text-align: left;"><strong>阶段八：IaC
+落盘验证与总结</strong></td>
+<td
+style="text-align: left;">查看生成的配置文件，理解声明式配置与可迁移部署。</td>
+<td style="text-align: left;">YAML, Config as Code</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="背景导入什么是-openclaw">🤖 背景导入：什么是 OpenClaw？</h2>
+<p><strong>OpenClaw（原 Clawdbot）</strong>
+是一款<strong>开源、自托管的个人 AI
+助手框架</strong>。它可以在本地计算机上运行，兼容 Windows 及 Linux
+等多种系统，支持与火山引擎等主流模型服务集成。</p>
+<h3 id="核心能力">核心能力</h3>
+<ul>
+<li><strong>多模型接入</strong>：支持火山引擎、OpenAI、Anthropic
+等多种模型提供商</li>
+<li><strong>多渠道集成</strong>：可接入飞书、钉钉、微信等常用聊天工具</li>
+<li><strong>插件扩展</strong>：除内置多种 Agent
+常用工具外，还可通过插件和 Skill 扩展更多能力</li>
+<li><strong>自托管</strong>：完全本地部署，数据隐私可控</li>
+</ul>
+<hr />
+<h2 id="为什么要学习-openclaw">💡 为什么要学习 OpenClaw？</h2>
+<h3 id="理解现代-ai-网关架构">1. 理解现代 AI 网关架构</h3>
+<p>OpenClaw
+是一个典型的<strong>多模型智能体网关</strong>，通过学习它，同学们可以理解：
+- 如何将不同来源的模型（云端/本地）统一管理 -
+如何通过声明式配置（Declarative Configuration）管理复杂系统 -
+如何实现企业级 IM 与大模型的端到端智能路由</p>
+<h3 id="体验声明式配置的便捷性">2. 体验声明式配置的便捷性</h3>
+<p>OpenClaw 采用了合理的默认配置（约定优于配置原则）： -
+开箱即用的默认设置，减少重复配置 - 只需显式声明需要覆盖的配置项 -
+大幅降低入门和使用门槛</p>
+<h3 id="实践基础设施即代码">3. 实践”基础设施即代码”</h3>
+<p>通过 OpenClaw，同学们可以体验 <strong>Infrastructure as Code
+(IaC)</strong> 的威力： - 所有配置都存储在 YAML/JSON 文件中 -
+配置可版本控制、可复制、可迁移 - 一键部署成百上千个网关实例</p>
+<hr />
+<h2 id="openclaw-的重要性">🏆 OpenClaw 的重要性</h2>
+<h3 id="企业级落地的现实选择">1. 企业级落地的现实选择</h3>
+<p>在企业环境中，OpenClaw 提供了： - <strong>WebSocket
+长连接</strong>：通过 WebSocket 实现与云端服务的实时双向通信 -
+<strong>权限隔离</strong>：支持最小特权原则，保障数据安全 -
+<strong>可观测性</strong>：完整的日志系统，便于调试和审计</p>
+<h3 id="开源社区生态">2. 开源社区生态</h3>
+<ul>
+<li>活跃的开源社区，持续迭代更新</li>
+<li>丰富的插件生态，可扩展性强</li>
+</ul>
+<h3 id="教育价值">3. 教育价值</h3>
+<p>对于学习现代软件工程的学生来说，OpenClaw
+是一个<strong>绝佳的教学案例</strong>： - 代码结构清晰，易于理解 -
+涵盖了软件工程多个核心概念 - 可以亲手搭建从 0 到 1 的完整系统</p>
+<hr />
+<h2 id="其他类似方案对比">🔍 其他类似方案对比</h2>
+<p>除了 OpenClaw，还有一些类似的 AI Agent 框架：</p>
+<h3 id="openai-swarm">1. OpenAI Swarm</h3>
+<ul>
+<li><strong>特点</strong>：OpenAI 官方推出的轻量级多 Agent 协调框架</li>
+<li><strong>优势</strong>：
+<ul>
+<li>与 GPT 模型深度集成</li>
+<li>简单易用的 API 设计</li>
+<li>专注于 Agent 之间的协调</li>
+</ul></li>
+<li><strong>局限</strong>：
+<ul>
+<li>主要支持 OpenAI 模型</li>
+<li>缺少企业级功能（如渠道集成、权限管理）</li>
+<li>相对较新，生态尚在建设中</li>
+</ul></li>
+</ul>
+<h3 id="langchain">2. LangChain</h3>
+<ul>
+<li><strong>特点</strong>：最流行的 LLM 应用开发框架</li>
+<li><strong>优势</strong>：
+<ul>
+<li>生态最丰富，插件最多</li>
+<li>支持几乎所有主流模型</li>
+<li>社区活跃，文档完善</li>
+</ul></li>
+<li><strong>局限</strong>：
+<ul>
+<li>学习曲线较陡</li>
+<li>对于简单场景可能过于复杂</li>
+<li>更多是开发库而非完整产品</li>
+</ul></li>
+</ul>
+<h3 id="dify">3. Dify</h3>
+<ul>
+<li><strong>特点</strong>：可视化的 LLMOps 平台</li>
+<li><strong>优势</strong>：
+<ul>
+<li>图形化界面，上手快</li>
+<li>内置工作流编排</li>
+<li>提供 SaaS 和自托管两种版本</li>
+</ul></li>
+<li><strong>局限</strong>：
+<ul>
+<li>自定义灵活性相对较低</li>
+<li>主要面向无代码/低代码场景</li>
+</ul></li>
+</ul>
+<h3 id="coze">4. Coze</h3>
+<ul>
+<li><strong>特点</strong>：字节跳动推出的 AI Bot 开发平台</li>
+<li><strong>优势</strong>：
+<ul>
+<li>与豆包模型深度集成</li>
+<li>丰富的插件市场</li>
+<li>支持多渠道发布</li>
+</ul></li>
+<li><strong>局限</strong>：
+<ul>
+<li>主要是云端 SaaS</li>
+<li>自托管选项有限</li>
+</ul></li>
+</ul>
+<h3 id="为什么选择-openclaw">为什么选择 OpenClaw？</h3>
+<p>在教学场景中，OpenClaw 的优势特别明显： ✅
+<strong>完整但不过度复杂</strong>——可以学到完整架构，又不会被细节淹没<br />
+✅ <strong>自托管优先</strong>——可以在本地完整运行，理解每个环节<br />
+✅ <strong>声明式配置</strong>——直观展示 IaC 理念<br />
+✅ <strong>多模型支持</strong>——可以同时体验云端和本地模型<br />
+✅ <strong>企业级功能</strong>——权限、安全、可观测性一应俱全</p>
+<hr />
+<h2 id="实验安全注意事项">⚠️ 实验安全注意事项</h2>
+<p>在开始实验之前，请仔细阅读并遵守以下安全规定：</p>
+<h3 id="凭证安全">1. 凭证安全</h3>
+<ul>
+<li><strong>API Key 保护</strong>：火山引擎 API Key、飞书 App Secret
+等敏感信息请妥善保管，切勿提交到公开仓库</li>
+<li><strong>临时使用</strong>：实验完成后，建议在火山引擎控制台删除临时创建的
+API Key</li>
+<li><strong>飞书应用</strong>：实验使用的飞书应用建议在课程结束后删除或重置
+App Secret</li>
+</ul>
+<h3 id="资源使用">2. 资源使用</h3>
+<ul>
+<li><strong>模型资源</strong>：合理控制模型调用频率，避免造成不必要的费用</li>
+<li><strong>本地资源</strong>：Ollama
+运行时注意监控内存和显存使用情况</li>
+<li><strong>网络资源</strong>：WebSocket
+连接保持稳定即可，无需频繁重连</li>
+</ul>
+<h3 id="数据安全">3. 数据安全</h3>
+<ul>
+<li><strong>测试数据</strong>：实验过程中使用测试数据，不要发送真实敏感信息</li>
+<li><strong>日志清理</strong>：实验完成后，可以清理 OpenClaw
+生成的日志文件</li>
+<li><strong>配置文件</strong>：config.yaml 中包含敏感信息，注意保密</li>
+</ul>
+<hr />
+<h2 id="环境准备与验证">🔧 环境准备与验证</h2>
+<h3 id="系统要求">1. 系统要求</h3>
+<ul>
+<li><strong>操作系统</strong>：Windows 10/11 或 Linux</li>
+<li><strong>Python 版本</strong>：Python 3.8+</li>
+<li><strong>内存</strong>：建议 16GB 以上（运行本地模型建议 32GB）</li>
+<li><strong>磁盘空间</strong>：至少 10GB 可用空间</li>
+<li><strong>网络</strong>：稳定的互联网连接</li>
+</ul>
+<h3 id="基础环境安装与确认">2. 基础环境安装与确认</h3>
+<h4 id="windows-用户使用-winget-安装推荐">Windows 用户：使用 winget
+安装（推荐）</h4>
+<p>如果同学使用 Windows 10/11，可以使用系统自带的包管理器
+<code>winget</code> 快速安装：</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 安装 Python 3.11</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>winget install Python<span class="op">.</span><span class="fu">Python</span><span class="op">.</span><span class="dv">3.11</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 安装 Git</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>winget install Git<span class="op">.</span><span class="fu">Git</span></span></code></pre></div>
+<p>安装完成后，<strong>重启终端</strong>，然后验证：</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">--version</span>  <span class="co"># 要求 &gt;= 3.8</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">--version</span>     <span class="co"># 确认 Git 客户端可用</span></span></code></pre></div>
+<h4 id="手动安装通用方式">手动安装（通用方式）</h4>
+<p>如果 winget 不可用，请手动安装： - <strong>Python</strong>: 访问
+https://www.python.org/downloads/ 下载安装 - <strong>Git</strong>: 访问
+https://git-scm.com/downloads/ 下载安装</p>
+<p><strong>防坑提示</strong>：如果提示
+<code>python 不是内部或外部命令</code>，请立刻检查系统环境变量 (Path)
+中是否已添加 Python 的安装路径。</p>
+<h3 id="本地底座唤醒-ollama">3. 本地底座唤醒 (Ollama)</h3>
+<h4 id="检查-ollama-运行状态">检查 Ollama 运行状态</h4>
+<ol type="1">
+<li>检查 Windows 右下角系统托盘，确认有一只”小羊驼”图标（代表 Ollama
+守护进程正在后台运行，否则本地 <code>11434</code> 端口是关闭的）。</li>
+<li>在终端运行：</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run qwen3.5:9b</span></code></pre></div>
+<ol start="3" type="1">
+<li>看到 <code>&gt;&gt;&gt;</code>
+提示符后，随便输入一句问候语。模型回复后，输入 <code>/bye</code>
+退出。</li>
+</ol>
+<p><strong>目的</strong>：将几 GB
+的模型权重预热加载到内存/显存中，避免后续实验时因冷启动导致网关请求超时。</p>
+<h3 id="openclaw-官方安装与火山引擎配置推荐方式">4. OpenClaw
+官方安装与火山引擎配置（推荐方式）</h3>
+<p>OpenClaw 提供了官方一键安装脚本，这是最简单、最标准的安装方式。</p>
+<h4
+id="方式一使用官方安装脚本推荐">方式一：使用官方安装脚本（推荐）</h4>
+<p><strong>Windows (PowerShell)</strong>：</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">iwr</span> <span class="op">-</span>useb https<span class="op">://</span>openclaw<span class="op">.</span><span class="fu">ai</span><span class="op">/</span>install<span class="op">.</span><span class="fu">ps1</span> <span class="op">|</span> <span class="fu">iex</span></span></code></pre></div>
+<p><strong>Linux</strong>：</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://openclaw.ai/install.sh <span class="kw">|</span> <span class="fu">bash</span></span></code></pre></div>
+<p>安装完成后，根据提示信息完成配置：</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">提示信息</th>
+<th style="text-align: left;">配置选项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">I understand this is personal-by-default
+and shared/multi-user use requires lock-down. Continue?</td>
+<td style="text-align: left;">选择 <strong>“Yes”</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Setup mode</td>
+<td style="text-align: left;">选择 <strong>“QuickStart”</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Model/auth provider</td>
+<td style="text-align: left;">选择 <strong>“Volcano
+Engine”</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Enter Volcano Engine API key</td>
+<td style="text-align: left;">填入同学自己的火山引擎 API Key</td>
+</tr>
+<tr>
+<td style="text-align: left;">Default model</td>
+<td style="text-align: left;">选择
+<strong>“volcengine-plan/ark-code-latest”</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Select channel (QuickStart)</td>
+<td style="text-align: left;">选择 <strong>“Skip for
+now”</strong>（后续配置）</td>
+</tr>
+<tr>
+<td style="text-align: left;">Configure skills now? (recommended)</td>
+<td style="text-align: left;">选择 <strong>“No”</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Enable hooks?</td>
+<td style="text-align: left;">按空格键选中，按回车下一步</td>
+</tr>
+<tr>
+<td style="text-align: left;">How do you want to hatch your bot?</td>
+<td style="text-align: left;">选择 <strong>“Hatch in TUI”</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="方式二使用-ark-helper-自动化配置仅-linux">方式二：使用 Ark
+Helper 自动化配置（仅 Linux）</h4>
+<p>Ark Helper 是火山引擎官方提供的配置助手，可自动完成 OpenClaw
+配置：</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 安装 Ark Helper</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://lf3-static.bytednsdoc.com/obj/eden-cn/ylwslo-yrh/ljhwZthlaukjlkulzlp/install.sh <span class="kw">|</span> <span class="fu">sh</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 验证安装</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">ark-helper</span> <span class="at">--version</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 启动配置助手</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="ex">ark-helper</span></span></code></pre></div>
+<p>根据界面提示： 1.
+选择套餐：<code>[Volcano] Volcano Engine（国内）</code> 2. 配置 API Key
+3. 选择默认模型 4. 选择工具：<code>OpenClaw</code> 5. 选择
+<code>设置 Volcano 配置到 OpenClaw</code></p>
+<h4 id="火山引擎-api-key-获取">火山引擎 API Key 获取</h4>
+<ol type="1">
+<li>登录<strong>火山引擎控制台</strong>，进入”火山方舟” (Volcengine
+Ark)</li>
+<li>在左侧导航栏找到 <strong>“API Key 管理”</strong></li>
+<li>点击 <strong>“创建 API Key”</strong>，创建后复制保存</li>
+</ol>
+<h4 id="支持的模型列表">支持的模型列表</h4>
+<p>配置文件中支持以下模型（可配置 Model Name）： -
+<code>doubao-seed-2.0-code</code> - <code>doubao-seed-2.0-pro</code> -
+<code>doubao-seed-2.0-lite</code> - <code>doubao-seed-code</code> -
+<code>minimax-m2.5</code> - <code>glm-4.7</code> -
+<code>deepseek-v3.2</code> - <code>kimi-k2.5</code></p>
+<p><strong>重要提示</strong>： - Base URL
+请使用：<code>https://ark.cn-beijing.volces.com/api/coding/v3</code>（兼容
+OpenAI 协议） - 不要使用
+<code>https://ark.cn-beijing.volces.com/api/v3</code>（会产生额外费用）
+- 支持 Auto 模式（通过控制台切换，配置文件中不支持）</p>
+<hr />
+<h2 id="第一阶段openclaw-安装方式补充">第一阶段：OpenClaw
+安装方式补充</h2>
+<p><strong>注意</strong>：官方一键安装方式已在”环境准备与验证”部分提供。如果已经使用官方脚本安装，可以直接跳至“第二阶段”。</p>
+<p>以下提供 pip 安装方式作为备选方案：</p>
+<h3 id="方式二pip-安装方式备选">方式二：pip 安装方式（备选）</h3>
+<p>现代软件开发的第一条铁律：<strong>永远不要把第三方包直接安装到系统全局环境中。</strong></p>
+<h4 id="python-虚拟环境创建与激活">1. Python 虚拟环境创建与激活</h4>
+<p><strong>Windows 环境</strong>： 在同学电脑的 D 盘或 E
+盘创建一个全英文的实验目录（例如
+<code>D:\AgentOps_Lab</code>）。在该目录下打开 PowerShell：</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>python <span class="op">-</span>m venv openclaw-env</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">.</span>\openclaw-env\Scripts\activate</span></code></pre></div>
+<p><strong>🛑 致命易错点 (PowerShell
+拦截)</strong>：如果执行第二句时出现红字报错
+<code>无法加载文件... 因为在此系统上禁止运行脚本</code>。 *
+<strong>解决</strong>：以<strong>管理员身份</strong>打开一个新的
+PowerShell 窗口，执行
+<code>Set-ExecutionPolicy RemoteSigned</code>，输入 <code>Y</code>
+确认。然后回到刚才的窗口重新激活。</p>
+<p><strong>成功标志</strong>：命令行最前面出现
+<code>(openclaw-env)</code> 的绿色前缀。</p>
+<h4 id="包管理安装">2. 包管理安装</h4>
+<p>在激活的虚拟环境中拉取 OpenClaw 核心包：</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install openclaw openclaw-cli</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> <span class="at">--version</span>  <span class="co"># 验证安装是否成功</span></span></code></pre></div>
+<h4 id="ollama-沙箱安装体验可选">3. Ollama 沙箱安装体验（可选）</h4>
+<p>如果暂不配置 Python
+环境，其实还可以利用大模型引擎直接拉取工具包。可新开一个普通终端尝试：</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run openclaw</span></code></pre></div>
+<p><strong>👨‍🏫 核心思考</strong>：<code>pip</code> 安装的包放置在
+<code>.venv</code> 目录中，而 <code>ollama run</code>
+下载的文件去哪了？它们在系统资源隔离级别上有什么本质不同？</p>
+<hr />
+<h2 id="第二阶段网关-gateway-启动与架构体验">第二阶段：网关 (Gateway)
+启动与架构体验</h2>
+<p>网关是 Agent 系统的交通枢纽。本阶段将体验默认配置的便捷性。</p>
+<h3 id="参数化配置与启动">1. 参数化配置与启动</h3>
+<p>无需配置 IP
+和端口，框架已经约定好了默认值。这里只显式声明需要覆盖的配置（开启 Debug
+方便查错）：</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure gateway <span class="at">--log-level</span> debug</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> start</span></code></pre></div>
+<p><strong>🛑 致命易错点 (防火墙拦截)</strong>：敲下 start 后，Windows
+可能会弹出”Windows Defender
+防火墙已阻止此应用的部分功能”。<strong>务必勾选”专用网络”和”公用网络”并允许访问</strong>，否则网关将被彻底封死。</p>
+<p><strong>验证</strong>：打开浏览器，访问
+<code>http://127.0.0.1:18789/health</code>。看到
+<code>{"status": "ok"}</code>
+即代表网关核心运转正常。<strong>保持这个终端不要关闭！</strong></p>
+<h3 id="wizard-交互式探索">2. Wizard 交互式探索</h3>
+<p>重新打开一个<strong>新的终端窗口</strong>（记得激活虚拟环境），直接输入：</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure</span></code></pre></div>
+<p><strong>目的</strong>：利用方向键浏览，看看网关级别还隐藏了哪些诸如
+SSL 证书、CORS 跨域等高级网络配置面板。看完后按 <code>Ctrl+C</code>
+退出向导。</p>
+<hr />
+<h2 id="第三阶段接入云端智能体-火山引擎豆包">第三阶段：接入云端智能体
+(火山引擎豆包)</h2>
+<h3 id="provider-与-agent-声明式配置">1. Provider 与 Agent
+声明式配置</h3>
+<p>在第二个终端中，使用完整的 CLI 命令进行配置注入：</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. 注册火山引擎作为供应商</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure provider add <span class="at">--name</span> volcengine-provider <span class="at">--base-url</span> <span class="st">&quot;https://ark.volces.com/api/v3&quot;</span> <span class="at">--api-key</span> <span class="st">&quot;填入同学自己的火山 API_KEY&quot;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. 挂载 Agent 1，注意 --model 后面跟的是 Endpoint ID！</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure agent add <span class="at">--name</span> agent-doubao <span class="dt">\</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> volcengine-provider <span class="dt">\</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--model</span> <span class="st">&quot;ep-2024xxxx-xxxx&quot;</span> <span class="dt">\</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--temperature</span> 0.1 <span class="dt">\</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--system-prompt</span> <span class="st">&quot;你是一个资深的程序员助手，只输出可执行的精简代码。&quot;</span></span></code></pre></div>
+<h3 id="架构思考与本地验证">2. 架构思考与本地验证</h3>
+<p><strong>👨‍🏫 架构思考</strong>：为什么这里配置模型时不写
+<code>Doubao-Seed-2.0-Code</code>，而是必须填 <code>ep-xxxx</code>
+这个乱码一样的端点 ID？</p>
+<p><em>解析</em>：因为在企业级云环境中，基础模型是被共享的。创建
+Endpoint
+相当于在云端划分专属的计算资源配额（TPS/RPM）。网关只认资源端点，不认模型名字。</p>
+<p><strong>验证</strong>：</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> cli chat <span class="at">--agent</span> agent-doubao <span class="at">-m</span> <span class="st">&quot;写一段Python的冒泡排序&quot;</span></span></code></pre></div>
+<p>如果能看到流式的代码输出，说明本地到云端的加密链路已打通。</p>
+<hr />
+<h2 id="第四阶段配置飞书-websocket-通信通道">第四阶段：配置飞书
+WebSocket 通信通道</h2>
+<p>为了让不在同一局域网的设备也能与本地网关通信，本实验需要接入企业级
+IM（飞书）。</p>
+<h3 id="飞书后台基础配置">1. 飞书后台基础配置</h3>
+<ol type="1">
+<li>登录<strong>飞书开发者后台</strong>，点击”创建企业自建应用”，随便起个名字（如”代码网关测试”）。</li>
+<li>在左侧”凭证与基础信息”中，找到 <code>App ID</code> 和
+<code>App Secret</code>，不要泄露。</li>
+<li><strong>关键步骤</strong>：左侧找到”事件订阅”，在这个页面中，将接收方式明确切换为<strong>“使用长连接接收事件
+(WebSocket)”</strong>。</li>
+</ol>
+<h3 id="配置网关通道">2. 配置网关通道</h3>
+<p>回到第二个终端，执行通道打通命令：</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure channel add <span class="at">--name</span> feishu-ws <span class="dt">\</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--type</span> feishu <span class="dt">\</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--app-id</span> <span class="st">&quot;你的AppID&quot;</span> <span class="dt">\</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--app-secret</span> <span class="st">&quot;你的AppSecret&quot;</span> <span class="dt">\</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--mode</span> websocket</span></code></pre></div>
+<p><strong>验证</strong>：切回运行着 <code>openclaw start</code>
+的第一个终端。观察 Debug 日志，只要刷出一行类似
+<code>[Channel] Feishu WebSocket connected successfully</code>
+的字样，说明同学电脑与飞书云端建立了双向隧道！</p>
+<h3 id="现代开发者体验-dx可选">3. 现代开发者体验 (DX)（可选）</h3>
+<p>如果复制 App Secret 不便，可敲入无参数的
+<code>openclaw configure channel</code>，选择 Feishu
+后，终端往往会打印出一个二维码。用飞书手机端扫码，网关会自动完成 OAuth
+鉴权。这在工业界被称为”现代 DX 体验提升”。</p>
+<hr />
+<h2
+id="第五阶段飞书端机器人最小特权配置">第五阶段：飞书端机器人”最小特权”配置</h2>
+<h3 id="权限最小化原则">1. 权限最小化原则</h3>
+<ol type="1">
+<li>在飞书后台左侧点击”添加应用能力”，添加”机器人”。</li>
+<li>左侧点击”权限管理”，搜索并<strong>仅勾选</strong>以下两个权限：
+<ul>
+<li><code>获取与发送单聊、群组消息 (im:message:send_as_bot)</code></li>
+<li><code>获取单聊消息 (im:message.p2p_msg:readonly)</code></li>
+</ul></li>
+<li>点击”创建版本” -&gt; “发布”。</li>
+</ol>
+<p><strong>验证</strong>：打开飞书 PC
+客户端，搜索已创建的机器人，发一句”你好”。此时观察本地的
+<code>openclaw start</code> 终端，屏幕上一定会闪过一大段 JSON
+代码（Message Payload）。这证明消息已经抵达同学电脑。</p>
+<hr />
+<h2
+id="第六阶段接入本地离线智能体-qwen3.59b">第六阶段：接入本地离线智能体
+(Qwen3.5:9b)</h2>
+<h3 id="配置本地-agent">1. 配置本地 Agent</h3>
+<p>在终端注入本地 Ollama 的配置：</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure provider add <span class="at">--name</span> local-provider <span class="at">--base-url</span> <span class="st">&quot;http://127.0.0.1:11434/v1&quot;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure agent add <span class="at">--name</span> agent-qwen <span class="dt">\</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--provider</span> local-provider <span class="dt">\</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--model</span> qwen3.5:9b <span class="dt">\</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--temperature</span> 0.6 <span class="dt">\</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--system-prompt</span> <span class="st">&quot;你是一个热情、博学的全能AI助手。&quot;</span></span></code></pre></div>
+<h3 id="离线验证测试">2. 离线验证测试</h3>
+<p><strong>操作</strong>：<strong>为了证明它真的是在本地跑的，请拔掉电脑网线（或关闭
+Wi-Fi）。</strong></p>
+<p>在终端执行：</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> cli chat <span class="at">--agent</span> agent-qwen <span class="at">-m</span> <span class="st">&quot;用中文介绍一下你自己&quot;</span></span></code></pre></div>
+<p>如果电脑风扇开始狂转并成功输出文字，说明本地私有化部署完美成功。<strong>测试完记得把网络恢复。</strong></p>
+<hr />
+<h2 id="第七阶段配置网关路由-router-与端到端验收">第七阶段：配置网关路由
+(Router) 与端到端验收</h2>
+<p>这是最核心的一步：网关就像一个调度员，需要根据消息中的命令前缀，将飞书的消息分发给刚才建好的两个
+Agent。</p>
+<h3 id="路由分发配置">1. 路由分发配置</h3>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure router add <span class="at">--prefix</span> <span class="st">&quot;/code&quot;</span> <span class="at">--target</span> agent-doubao</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure router add <span class="at">--prefix</span> <span class="st">&quot;/chat&quot;</span> <span class="at">--target</span> agent-qwen</span></code></pre></div>
+<h3 id="端到端验收-终测">2. 端到端验收 (终测)</h3>
+<p>在飞书客户端，向已创建的机器人发送以下两条消息： 1.
+<code>@机器人 /code 帮我用Java写一个线程安全的单例模式</code> 2.
+<code>@机器人 /chat 请用30个字解释一下什么是现代软件开发</code></p>
+<p><strong>验收标准</strong>： * 指令 1
+应该迅速返回，且代码在飞书中呈现漂亮的<strong>黑底 Markdown
+代码块</strong>排版。 * 指令 2
+应该会稍微慢一点（取决于机房电脑的显卡算力），并在本地终端引发一波日志刷屏，最终将结果返回飞书。</p>
+<hr />
+<h2
+id="第八阶段基础设施即代码-iac-的落盘验证与总结">第八阶段：基础设施即代码
+(IaC) 的落盘验证与总结</h2>
+<h3 id="揭开魔法的面纱">1. 揭开魔法的面纱</h3>
+<p>在同学的实验文件夹中，找到自动生成的 <code>config.yaml</code>（或
+<code>.openclaw/config.yaml</code>）。用 VS Code 或记事本打开它。</p>
+<p><strong>观察</strong>：同学们会发现，刚才敲下的所有
+<code>--name</code>、<code>--temperature</code>、<code>--prefix</code>，全部严丝合缝地转化为了这个
+YAML 文件中的树状结构。</p>
+<h3 id="课后总结">2. 课后总结</h3>
+<p>在企业里进行
+CI/CD（持续集成与交付）时，没有任何界面用于点击“下一步”，也不依赖手机扫码。只需把这个写满命令的脚本跑一遍，或者直接把这个
+<code>config.yaml</code> 推送到服务器，成百上千台网关就能在 1
+秒内配置完毕。这就是<strong>基础设施即代码</strong>的暴力美学，也是本实验希望同学们形成的最重要的工程思维。</p>
+<hr />
+<h2 id="常见问题-faq">❓ 常见问题 FAQ</h2>
+<h3 id="环境配置相关">环境配置相关</h3>
+<h4 id="q1-python-虚拟环境激活失败">Q1: Python 虚拟环境激活失败？</h4>
+<p><strong>A:</strong> - Windows: 检查 PowerShell
+执行策略，使用管理员权限运行
+<code>Set-ExecutionPolicy RemoteSigned</code> - Linux: 确认使用
+<code>source</code> 命令激活，而不是直接执行脚本 -
+确认虚拟环境目录路径正确</p>
+<h4 id="q2-openclaw-安装失败">Q2: OpenClaw 安装失败？</h4>
+<p><strong>A:</strong> - 确认虚拟环境已激活（命令行前有
+<code>(openclaw-env)</code> 前缀） -
+检查网络连接，尝试使用清华源：<code>pip install -i https://pypi.tuna.tsinghua.edu.cn/simple openclaw openclaw-cli</code>
+- 确认 Python 版本 &gt;= 3.8</p>
+<h4 id="q3-ollama-无法启动">Q3: Ollama 无法启动？</h4>
+<p><strong>A:</strong> - Windows: 检查系统托盘中是否有 Ollama 图标 -
+Linux: 运行 <code>ollama serve</code> 手动启动服务 - 检查端口 11434
+是否被占用：<code>netstat -ano | findstr 11434</code> (Windows) 或
+<code>lsof -i :11434</code> (Linux)</p>
+<hr />
+<h3 id="网关配置相关">网关配置相关</h3>
+<h4 id="q4-网关启动后无法访问-health-接口">Q4: 网关启动后无法访问 health
+接口？</h4>
+<p><strong>A:</strong> - 确认 <code>openclaw start</code> 终端没有报错 -
+检查防火墙设置，确保允许 OpenClaw 访问网络 - 尝试访问
+<code>http://localhost:18789/health</code> 或
+<code>http://127.0.0.1:18789/health</code> - 查看 Debug
+日志，确认网关监听的端口</p>
+<h4 id="q5-provider-配置后验证失败">Q5: Provider 配置后验证失败？</h4>
+<p><strong>A:</strong> - 确认 API Key 正确无误，没有多余空格 -
+检查火山引擎 Endpoint 状态是否为”健康” - 确认 base-url
+格式正确：<code>https://ark.volces.com/api/v3</code> - 查看网关 Debug
+日志，定位具体错误</p>
+<h4 id="q6-agent-聊天测试失败">Q6: Agent 聊天测试失败？</h4>
+<p><strong>A:</strong> - 确认 Provider 配置正确 - 检查模型名称/Endpoint
+ID 是否正确 - 确认温度参数在合理范围 (0.0-2.0) -
+查看网关日志，了解详细错误信息</p>
+<hr />
+<h3 id="飞书配置相关">飞书配置相关</h3>
+<h4 id="q7-websocket-连接失败">Q7: WebSocket 连接失败？</h4>
+<p><strong>A:</strong> - 确认飞书后台已切换到”使用长连接接收事件”模式 -
+检查 App ID 和 App Secret 是否正确 -
+确认网络连接正常，能够访问飞书服务器 - 查看网关 Debug 日志中的 WebSocket
+连接信息</p>
+<h4 id="q8-机器人收不到消息">Q8: 机器人收不到消息？</h4>
+<p><strong>A:</strong> - 确认机器人已发布到企业 -
+检查机器人权限是否正确配置 - 确认是单聊还是群聊，群聊需要 <span
+class="citation" data-cites="机器人">@机器人</span> -
+查看网关日志，确认是否有消息 payload 到达</p>
+<h4 id="q9-机器人回复失败">Q9: 机器人回复失败？</h4>
+<p><strong>A:</strong> - 确认路由配置正确：<code>/code</code> 和
+<code>/chat</code> 前缀 - 检查对应 Agent 是否正常工作 -
+确认飞书机器人有发送消息的权限 - 查看网关日志，定位回复失败原因</p>
+<hr />
+<h3 id="本地模型相关">本地模型相关</h3>
+<h4 id="q10-ollama-本地模型连接失败">Q10: Ollama 本地模型连接失败？</h4>
+<p><strong>A:</strong> - 确认 Ollama 服务正在运行 - 检查
+<code>http://127.0.0.1:11434</code> 是否可访问 -
+确认模型已正确下载：<code>ollama list</code> - 检查 base-url
+配置：<code>http://127.0.0.1:11434/v1</code></p>
+<h4 id="q11-本地模型响应很慢">Q11: 本地模型响应很慢？</h4>
+<p><strong>A:</strong> - 这是正常现象，本地模型推理需要消耗大量计算资源
+- 检查电脑内存和显存使用情况 - 考虑使用更小的模型（如 qwen3.5:4b） -
+关闭其他占用资源的应用程序</p>
+<h4 id="q12-离线测试失败">Q12: 离线测试失败？</h4>
+<p><strong>A:</strong> - 确认网络已完全断开（拔掉网线或关闭 Wi-Fi） -
+确认使用的是 <code>agent-qwen</code>（本地模型）而不是
+<code>agent-doubao</code>（云端模型） - 确认 Ollama 服务仍在运行（Ollama
+不需要网络） - 检查本地模型是否已正确下载到本地</p>
+<hr />
+<h3 id="路由与验收相关">路由与验收相关</h3>
+<h4 id="q13-路由配置不生效">Q13: 路由配置不生效？</h4>
+<p><strong>A:</strong> - 确认前缀格式正确（如
+<code>/code</code>，前面有斜杠） - 确认目标 Agent 名称正确 - 查看
+config.yaml 文件，确认路由配置已保存 - 重启网关使配置生效</p>
+<h4 id="q14-飞书中代码块显示不正常">Q14: 飞书中代码块显示不正常？</h4>
+<p><strong>A:</strong> - 这通常是飞书客户端的渲染问题 - 确认 Agent 的
+system prompt 要求输出 Markdown 格式 -
+可以尝试在飞书中复制消息内容，在其他 Markdown 编辑器中查看 -
+检查网关日志，确认返回内容格式正确</p>
+<h4 id="q15-如何查看生成的-config.yaml">Q15: 如何查看生成的
+config.yaml？</h4>
+<p><strong>A:</strong> - Windows: 通常在用户目录下的
+<code>.openclaw</code> 文件夹中 - Linux:
+<code>~/.openclaw/config.yaml</code> - 也可以在实验目录中查找 -
+注意：该文件包含敏感信息，不要分享给他人</p>
+<hr />
+<h3 id="扩展学习相关">扩展学习相关</h3>
+<h4 id="q16-可以参考哪些额外资源">Q16: 可以参考哪些额外资源？</h4>
+<p><strong>A:</strong> - OpenClaw 官方文档（如有） - 火山引擎方舟文档 -
+飞书开放平台文档 - Ollama 官方文档 - 现代软件工程相关书籍和文章</p>
+<hr />
+<h2 id="附录openclaw-常用命令参考">附录：OpenClaw 常用命令参考</h2>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 网关相关</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure gateway <span class="at">--log-level</span> debug  <span class="co"># 配置网关日志级别</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> start                                  <span class="co"># 启动网关</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> stop                                   <span class="co"># 停止网关</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Provider 相关</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure provider add <span class="at">--name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --base-url <span class="op">&lt;</span>url<span class="op">&gt;</span> --api-key <span class="op">&lt;</span>key<span class="op">&gt;</span>  <span class="co"># 添加 Provider</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure provider list                                                 <span class="co"># 列出所有 Provider</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure provider remove <span class="op">&lt;</span>name<span class="op">&gt;</span>                                        <span class="co"># 删除 Provider</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Agent 相关</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure agent add <span class="at">--name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --provider <span class="op">&lt;</span>provider<span class="op">&gt;</span> --model <span class="op">&lt;</span>model<span class="op">&gt;</span>  <span class="co"># 添加 Agent</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure agent list                                                       <span class="co"># 列出所有 Agent</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure agent remove <span class="op">&lt;</span>name<span class="op">&gt;</span>                                              <span class="co"># 删除 Agent</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> cli chat <span class="at">--agent</span> <span class="op">&lt;</span>agent<span class="op">&gt;</span> -m <span class="op">&lt;</span>message<span class="op">&gt;</span>                                     <span class="co"># 测试 Agent</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Channel 相关</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure channel add <span class="at">--name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --type <span class="op">&lt;</span>type<span class="op">&gt;</span> --app-id <span class="op">&lt;</span>id<span class="op">&gt;</span> --app-secret <span class="op">&lt;</span>secret<span class="op">&gt;</span>  <span class="co"># 添加 Channel</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure channel list                                                                      <span class="co"># 列出所有 Channel</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure channel remove <span class="op">&lt;</span>name<span class="op">&gt;</span>                                                             <span class="co"># 删除 Channel</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Router 相关</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure router add <span class="at">--prefix</span> <span class="op">&lt;</span>prefix<span class="op">&gt;</span> --target <span class="op">&lt;</span>agent<span class="op">&gt;</span>  <span class="co"># 添加路由</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure router list                                       <span class="co"># 列出所有路由</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure router remove <span class="op">&lt;</span>prefix<span class="op">&gt;</span>                            <span class="co"># 删除路由</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="co"># 交互式配置</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure          <span class="co"># 进入 Wizard 交互式配置</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure provider <span class="co"># Provider 配置向导</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure agent    <span class="co"># Agent 配置向导</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure channel  <span class="co"># Channel 配置向导</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a><span class="ex">openclaw</span> configure router   <span class="co"># Router 配置向导</span></span></code></pre></div>
