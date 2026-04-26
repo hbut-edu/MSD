@@ -1,10 +1,10 @@
 # 《现代软件开发技术》上机实验手册：传统 SaaS 到 AI Agent (MCP) 全景实战
 
-# 实验主题
+## 实验主题
 
 传统 SaaS 到 AI Agent (MCP) 全景实战
 
-# 实验目标
+## 实验目标
 
 1. 理解传统 SaaS 架构与 AI Agent 架构的核心差异
 2. 掌握 Dense 与 MoE 模型架构的特点和适用场景
@@ -15,16 +15,16 @@
 7. 掌握自然语言界面（LUI）的构建方法
 8. 建立 AI 时代软件工程的新思维
 
-# 📅 课程概览 (Total: 240 Mins)
+## 📅 课程概览 (Total: 240 Mins)
 
 | 时间段 | 教学环节 | 核心目标 | 关键技术栈 |
 | :--- | :--- | :--- | :--- |
-| **0-30** | **模块一：理论导入** | 理解 SaaS 与 Agent 架构差异，掌握 Dense vs MoE 架构特点。 | 理论讲授、架构图解 |
-| **30-70** | **模块二：环境准备与工具构建** | 完成 Ollama 本地部署，下载模型，构建原子化业务工具库。 | Ollama, Python, pip, 函数式编程 |
-| **70-110** | **模块三：SaaS 对照组实现** | 实现传统 SaaS 巨石架构控制器，理解硬编码局限性。 | 面向对象编程, 耦合设计 |
-| **110-150** | **模块四：MCP 工具定义与 Agent 调度器** | 掌握 MCP 工具 Schema，实现 Agent 核心调度器。 | JSON Schema, OpenAI API, 链式调用 |
-| **150-190** | **模块五：双轨对比 UI 与实验观察** | 构建对比实验 UI，观测 Dense 与 MoE 模型的表现差异。 | Gradio, 实验设计, 性能观测 |
-| **190-240** | **模块六：综合实战与结课** | 完成综合实验，建立 AI 时代软件工程新思维。 | 项目实战, 工程化思维 |
+| **0-30'** | **模块一：理论导入** | 理解 SaaS 与 Agent 架构差异，掌握 Dense vs MoE 架构特点。 | 理论讲授、架构图解 |
+| **30-70'** | **模块二：环境准备与工具构建** | 完成 Ollama 本地部署，下载模型，构建原子化业务工具库。 | Ollama, Python, pip, 函数式编程 |
+| **70-110'** | **模块三：SaaS 对照组实现** | 实现传统 SaaS 巨石架构控制器，理解硬编码局限性。 | 面向对象编程, 耦合设计 |
+| **110-150'** | **模块四：MCP 工具定义与 Agent 调度器** | 掌握 MCP 工具 Schema，实现 Agent 核心调度器。 | JSON Schema, OpenAI API, 链式调用 |
+| **150-190'** | **模块五：双轨对比 UI 与实验观察** | 构建对比实验 UI，观测 Dense 与 MoE 模型的表现差异。 | Gradio, 实验设计, 性能观测 |
+| **190-240'** | **模块六：综合实战与结课** | 完成综合实验，建立 AI 时代软件工程新思维。 | 项目实战, 工程化思维 |
 
 ---
 
@@ -102,10 +102,10 @@ ollama version 0.1.x
 
 ### 4. 下载模型
 ```bash
-# 下载 qwen3.5:9b (Dense 模型，约 6GB)
+# 下载 qwen3.5:9b (Dense 模型，约 6.6GB)
 ollama pull qwen3.5:9b
 
-# 下载 qwen3.5:35b-a3b (MoE 模型，约 12GB)
+# 下载 qwen3.5:35b-a3b (MoE 模型，约 24GB，以 Ollama 页面实际显示为准)
 ollama pull qwen3.5:35b-a3b
 
 # 查看已下载的模型
@@ -115,8 +115,8 @@ ollama list
 **预期输出：**
 ```
 NAME              ID              SIZE      MODIFIED
-qwen3.5:9b        ...             6.2 GB    2 minutes ago
-qwen3.5:35b-a3b   ...             12.1 GB   1 minute ago
+qwen3.5:9b        ...             6.6 GB    2 minutes ago
+qwen3.5:35b-a3b   ...             24 GB     1 minute ago
 ```
 
 ### 5. 测试本地模型
@@ -729,7 +729,7 @@ pip uninstall -y gradio openai
 
 ---
 
-## � 实验总结
+## 📝 课后延伸与测试建议
 
 ### 1. 核心收获
 
@@ -1051,7 +1051,7 @@ if __name__ == "__main__":
 
 ---
 
-## �📚 参考资源
+## 📚 参考资源
 
 ### 官方文档
 * **Ollama 官方文档**：https://github.com/ollama/ollama
@@ -1099,7 +1099,7 @@ if __name__ == "__main__":
 **A:**
 - 只下载需要的模型，不要下载所有模型
 - 删除不需要的模型：`ollama rm <模型名>`
-- qwen3.5:9b约6GB，qwen3.5:35b-a3b约12GB
+- qwen3.5:9b约6.6GB，qwen3.5:35b-a3b约24GB（以 Ollama 页面实际显示为准）
 - 可以先只用qwen3.5:9b完成实验
 
 ---

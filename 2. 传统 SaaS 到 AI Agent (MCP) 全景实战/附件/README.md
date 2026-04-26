@@ -9,7 +9,7 @@
 | [app.py](app.py) | 主应用程序，包含完整的实现 |
 | [test_app.py](test_app.py) | 单元测试和性能测试 |
 | [requirements.txt](requirements.txt) | Python 依赖包列表 |
-| [instruction.md](instruction.md) | 详细的实验手册 |
+| [instruction.md](../instruction.md) | 详细的实验手册 |
 
 ## 🚀 快速开始
 
@@ -32,10 +32,10 @@ ollama serve
 ### 3. 下载模型
 
 ```bash
-# 下载 qwen3.5:9b (Dense 模型，约 6GB)
+# 下载 qwen3.5:9b (Dense 模型，约 6.6GB)
 ollama pull qwen3.5:9b
 
-# 下载 qwen3.5:35b-a3b (MoE 模型，约 12GB)
+# 下载 qwen3.5:35b-a3b (MoE 模型，约 24GB，以 Ollama 页面实际显示为准)
 ollama pull qwen3.5:35b-a3b
 
 # 查看已下载的模型
@@ -127,7 +127,7 @@ ollama pull qwen3.5:9b
 
 ## 📚 更多信息
 
-详细的实验说明请查看 [instruction.md](instruction.md)。
+详细的实验说明请查看 [instruction.md](../instruction.md)。
 
 ## 🎓 学习要点
 
