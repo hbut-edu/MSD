@@ -1,2 +1,8 @@
-gradio>=4.0.0
-openai>=1.0.0
+# Gradio 6 用于构建本地 Web UI，并使用 messages 格式的 Chatbot。
+gradio>=6.0.0
+
+# OpenAI SDK 2.x 用于调用 Ollama 暴露的 OpenAI 兼容 /v1 接口。
+openai>=2.0.0
+
+# requests 用于集成测试中检查 Gradio 本地服务是否成功启动。
+requests>=2.0.0

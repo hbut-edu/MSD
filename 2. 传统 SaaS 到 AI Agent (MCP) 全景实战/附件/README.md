@@ -13,10 +13,12 @@
 
 ## 🚀 快速开始
 
-### 1. 安装依赖
+### 1. 创建 Conda 环境并安装依赖
 
 ```bash
-pip install -r requirements.txt
+conda create -y -n msd-agent-mcp python=3.10
+conda activate msd-agent-mcp
+python -m pip install -r requirements.txt
 ```
 
 ### 2. 启动 Ollama 服务
@@ -32,11 +34,11 @@ ollama serve
 ### 3. 下载模型
 
 ```bash
-# 下载 qwen3.5:9b (Dense 模型，约 6.6GB)
-ollama pull qwen3.5:9b
+# 下载 qwen3.6:27b (Dense 模型，默认量化版本约 17GB)
+ollama pull qwen3.6:27b
 
-# 下载 qwen3.5:35b-a3b (MoE 模型，约 24GB，以 Ollama 页面实际显示为准)
-ollama pull qwen3.5:35b-a3b
+# 下载 qwen3.6:35b-a3b (MoE 模型，默认量化版本约 24GB，以 Ollama 页面实际显示为准)
+ollama pull qwen3.6:35b-a3b
 
 # 查看已下载的模型
 ollama list
@@ -45,6 +47,7 @@ ollama list
 ### 4. 运行应用
 
 ```bash
+conda activate msd-agent-mcp
 python app.py
 ```
 
@@ -55,13 +58,25 @@ python app.py
 ### 运行单元测试
 
 ```bash
+conda activate msd-agent-mcp
 python test_app.py
 ```
 
 ### 运行性能测试
 
 ```bash
+conda activate msd-agent-mcp
 python test_app.py --performance
+```
+
+### 验证 instruction.md 中的 Python 代码块
+
+```bash
+conda activate msd-agent-mcp
+python verify_instruction_code.py
+
+# 在 qwen3.6:35b-a3b 已下载后，可额外验证真实 Ollama API 连接片段
+python verify_instruction_code.py --live-ollama
 ```
 
 ## 📊 功能特性
@@ -118,12 +133,12 @@ python test_app.py --performance
 ollama list
 
 # 下载模型
-ollama pull qwen3.5:9b
+ollama pull qwen3.6:35b-a3b
 ```
 
 ### 内存不足
 - 关闭其他应用程序释放内存
-- 使用较小的模型（qwen3.5:9b）
+- 优先使用默认 `q4_K_M` 量化版本，避免在普通课堂机器上下载 BF16 版本
 
 ## 📚 更多信息
 
