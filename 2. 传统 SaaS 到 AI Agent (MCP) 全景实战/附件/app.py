@@ -235,7 +235,7 @@ def saas_generate_payroll_api():
         print(f"❌ SaaS 执行失败: {e}")
         return [[str(e), "", "", "", ""]], None
 
-# ==================== MCP Schema ====================
+# ==================== MCP 风格 Schema ====================
 # 这里使用 OpenAI/Ollama tool calling 的 JSON Schema 形式描述本地工具。
 # 对模型来说，这相当于一份“工具菜单”：模型只能看到函数名、说明和参数结构，看不到函数内部代码。
 tools_schema = [
@@ -328,13 +328,33 @@ def agent_orchestrator(user_message, history, messages_state, selected_model):
                     tool_choice="auto"
                 )
                 response_msg = response.choices[0].message
-                messages_state.append(response_msg)
+                tool_calls = response_msg.tool_calls or []
+
+                # OpenAI SDK 返回的是消息对象；为了让下一轮请求、Gradio State 和测试都稳定，
+                # 这里显式转换成 OpenAI Chat Completions 接口可接受的 dict。
+                assistant_message = {"role": "assistant", "content": response_msg.content}
+                if tool_calls:
+                    assistant_message["tool_calls"] = []
+                    for index, tool_call in enumerate(tool_calls, start=1):
+                        raw_tool_call_id = getattr(tool_call, "id", None)
+                        tool_call_id = raw_tool_call_id if isinstance(raw_tool_call_id, str) else f"tool_call_{iteration}_{index}"
+                        raw_tool_call_type = getattr(tool_call, "type", "function")
+                        tool_call_type = raw_tool_call_type if isinstance(raw_tool_call_type, str) else "function"
+                        assistant_message["tool_calls"].append({
+                            "id": tool_call_id,
+                            "type": tool_call_type,
+                            "function": {
+                                "name": tool_call.function.name,
+                                "arguments": tool_call.function.arguments or "{}"
+                            }
+                        })
+                messages_state.append(assistant_message)
                 
                 # 如果模型返回 tool_calls，说明它还不准备最终回答，而是需要执行一个或多个工具。
-                if response_msg.tool_calls:
-                    logger.info(f"模型请求调用 {len(response_msg.tool_calls)} 个工具")
+                if tool_calls:
+                    logger.info(f"模型请求调用 {len(tool_calls)} 个工具")
                     
-                    for tool_call in response_msg.tool_calls:
+                    for index, tool_call in enumerate(tool_calls, start=1):
                         func_name = tool_call.function.name
                         logger.info(f"准备调用工具: {func_name}")
                         
@@ -367,8 +387,10 @@ def agent_orchestrator(user_message, history, messages_state, selected_model):
                         logger.info(f"工具 {func_name} 执行完成，耗时: {execution_time:.2f}秒")
                         
                         # 工具结果必须以 role=tool 回注，并带上 tool_call_id，模型才能把结果对应回刚才的调用。
+                        raw_tool_call_id = getattr(tool_call, "id", None)
+                        tool_call_id = raw_tool_call_id if isinstance(raw_tool_call_id, str) else f"tool_call_{iteration}_{index}"
                         messages_state.append({
-                            "role": "tool", "tool_call_id": tool_call.id, "name": func_name, "content": tool_result
+                            "role": "tool", "tool_call_id": tool_call_id, "name": func_name, "content": tool_result
                         })
                         logger.info(f"工具结果已回注到上下文")
                     
@@ -381,7 +403,6 @@ def agent_orchestrator(user_message, history, messages_state, selected_model):
                     final_text = response_msg.content or "任务已完成，但模型没有返回文本结果。"
                     logger.info(f"模型输出最终结果: {final_text[:100]}...")
                     
-                    messages_state.append({"role": "assistant", "content": final_text})
                     history[-1] = {"role": "assistant", "content": final_text}
                     yield history, messages_state
                     break 

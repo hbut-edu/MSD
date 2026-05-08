@@ -1,6 +1,6 @@
 """验证实验手册中的 Python 代码块是否真的可以运行。
 
-这个脚本面向教师或助教，用于发布材料前做自动化自检。它会从上一级
+这个脚本面向课程材料维护者，用于发布材料前做自动化自检。它会从上一级
 `instruction.md` 中抽取所有 Python 代码块，临时拼装成可执行的应用文件，
 再运行编译检查、业务冒烟测试、文档内单元测试以及可选的 Ollama API 实测。
 
@@ -120,7 +120,7 @@ def run(cmd: list[str], cwd: Path, timeout: int = 60) -> subprocess.CompletedPro
         timeout=timeout,
     )
     if result.returncode != 0:
-        # 失败时主动打印输出，便于助教定位是哪段文档代码不可运行。
+        # 失败时主动打印输出，便于定位是哪段文档代码不可运行。
         print(result.stdout)
         print(result.stderr, file=sys.stderr)
         raise subprocess.CalledProcessError(result.returncode, cmd, result.stdout, result.stderr)

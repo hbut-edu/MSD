@@ -65,7 +65,7 @@
 | 0_0 | [课程导入](<0_0. 课程导入/>) | 课程介绍、导入材料与配套课件 | 按教学安排 |
 | 0_1 | [版本管理工具 Git 实战](<0_1. 版本管理工具Git实战/instruction.md>) | Git 基础、远程仓库、IDE 集成、分支管理、冲突消解、分支保护 | 240 分钟 |
 | 1 | [TDD 与 CI-CD 全链路实战](<1. TDD 与 CI-CD 全链路实战/instruction.md>) | 本地开发环境、Gitee 仓库、CI/CD 配置、测试驱动开发与实验总结 | 240 分钟 |
-| 2 | [传统 SaaS 到 AI Agent (MCP) 全景实战](<2. 传统 SaaS 到 AI Agent (MCP) 全景实战/instruction.md>) | Ollama、Qwen3.5、本地模型调用、MCP 工具抽象、Gradio 交互界面 | 240 分钟 |
+| 2 | [传统 SaaS 到 AI Agent (MCP) 全景实战](<2. 传统 SaaS 到 AI Agent (MCP) 全景实战/instruction.md>) | Ollama、Qwen3.6、本地模型调用、MCP 风格工具抽象、Gradio 交互界面 | 240 分钟 |
 | 3 | [LLMOps 工业实战：从模型部署到可观测性治理](<3. LLMOps 工业实战：从模型部署到可观测性治理/instruction.md>) | 本地模型部署、A/B 测试、提示词注入、MCP 工具调用、护栏评估、可观测性治理 | 300 分钟 |
 | 4 | [AgentOps 工业实战：多模型智能体网关部署](<4. AgentOps工业实战：多模型智能体网关部署/instruction.md>) | OpenClaw、云端与本地智能体接入、飞书通道、Router 路由、Skill/MCP 与配置落盘 | 240 分钟 |
 | 5 | [编辑中：提示词工程验证、EDD 与 AI 系统安全伦理](<%3C编辑中%3E5. 提示词工程验证与评估/instruction.md>) | 提示词样本集、版本管理、Evaluator、批量评估、注入攻击测试、敏感信息脱敏、错误分析与伦理反思 | 300 分钟 |
@@ -100,7 +100,7 @@
 
 - Git、IDEA、VS Code、Gitee 或 GitHub。
 - Python 3.10+ 或 Python 3.11，`pip` 与虚拟环境。
-- Ollama 与 Qwen3.5 系列模型。
+- Ollama 与 Qwen 系列本地模型。
 - Gradio、MCP SDK、OpenAI 兼容接口客户端。
 - OpenClaw、飞书开放平台、火山引擎豆包相关配置。
 - FastAPI、Uvicorn、Docker、`asyncio`、本地 RAG 与轻量级评估脚本。

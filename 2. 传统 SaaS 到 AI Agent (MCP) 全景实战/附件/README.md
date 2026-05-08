@@ -33,11 +33,15 @@ ollama serve
 
 ### 3. 下载模型
 
+16GB 普通笔记本不要优先下载官方默认量化版本。请先阅读上级目录中的 `instruction.md`，按 ModelScope 或 GGUF 导入方式选择低内存量化：MoE 35B-A3B 优先使用 `IQ3/Q3` 作为主实验模型，Dense 27B 只作为短提示、高风险对照，并最终命名为 `qwen3.6:27b` 与 `qwen3.6:35b-a3b`。
+
+32GB 以上机器可以使用 Ollama 官方默认量化版本：
+
 ```bash
-# 下载 qwen3.6:27b (Dense 模型，默认量化版本约 17GB)
+# 下载 qwen3.6:27b (Dense 模型，官方默认量化版本约 17GB)
 ollama pull qwen3.6:27b
 
-# 下载 qwen3.6:35b-a3b (MoE 模型，默认量化版本约 24GB，以 Ollama 页面实际显示为准)
+# 下载 qwen3.6:35b-a3b (MoE 模型，官方默认量化版本约 24GB，以 Ollama 页面实际显示为准)
 ollama pull qwen3.6:35b-a3b
 
 # 查看已下载的模型
@@ -132,13 +136,15 @@ python verify_instruction_code.py --live-ollama
 # 检查模型是否已下载
 ollama list
 
-# 下载模型
+# 32GB 以上机器可以直接下载官方默认量化；16GB 机器请按 instruction.md 选择低内存 GGUF 后导入
 ollama pull qwen3.6:35b-a3b
 ```
 
 ### 内存不足
 - 关闭其他应用程序释放内存
-- 优先使用默认 `q4_K_M` 量化版本，避免在普通课堂机器上下载 BF16 版本
+- 16GB 机器主实验优先使用 MoE 35B-A3B 的 `IQ3/Q3` 低内存量化；Dense 27B 只作为短提示对照，必要时使用模型页面提供的 `IQ2/Q2_K` 兜底
+- 32GB 以上机器再优先使用官方默认 `q4_K_M`，避免在普通课堂机器上下载 BF16 版本
+- 低内存导入 GGUF 时建议设置 `PARAMETER num_ctx 2048`
 
 ## 📚 更多信息
 
