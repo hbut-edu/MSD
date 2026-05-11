@@ -1,6 +1,6 @@
 # 现代软件开发技术上机实验材料
 
-本项目是《现代软件开发技术》课程的上机实验教学材料库，围绕版本管理、TDD 与 CI/CD、AI Agent、LLMOps 和 AgentOps 等主题组织。材料以 Markdown 实验手册为主，配套代码、图片、PPT、示例脚本和其他辅助文件统一放入各主题的 `附件/` 子目录。
+本项目是《现代软件开发技术》课程的上机实验教学材料库，围绕版本管理、TDD 与 CI/CD、AI Agent、RAG、LLMOps 和 AgentOps 等主题组织。材料以 Markdown 实验手册为主，配套代码、图片、PPT、示例脚本和其他辅助文件统一放入各主题的 `附件/` 子目录。
 
 ## 项目结构
 
@@ -20,7 +20,7 @@
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
-├── 3. LLMOps 工业实战：从模型部署到可观测性治理/
+├── 3. 本地 RAG 与知识增强问答：从资料检索到资料外拒答/
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
@@ -28,11 +28,11 @@
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
-├── <编辑中>5. 提示词工程验证与评估/
+├── 5. 提示词工程验证与评估/
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
-├── <编辑中>6. Harness工程与Agent安全护栏/
+├── 6. Harness工程与Agent安全护栏/
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
@@ -40,10 +40,7 @@
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
-├── <编辑中>8. 本地RAG与长期记忆系统/
-│   ├── instruction.md
-│   ├── 实验报告提交及评分标准.md
-│   └── 附件/
+├── <编辑中>8. TBD/
 ├── <编辑中>9. 多Agent状态机协作与工作流编排/
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
@@ -52,10 +49,7 @@
 │   ├── instruction.md
 │   ├── 实验报告提交及评分标准.md
 │   └── 附件/
-└── <编辑中>11. EDD评估驱动开发与AI系统安全伦理/  # 内容已并入实验 5，保留历史材料
-    ├── instruction.md
-    ├── 实验报告提交及评分标准.md
-    └── 附件/
+└── <编辑中>11. TBD/
 ```
 
 ## 主题索引
@@ -66,15 +60,15 @@
 | 0_1 | [版本管理工具 Git 实战](<0_1. 版本管理工具Git实战/instruction.md>) | Git 基础、远程仓库、IDE 集成、分支管理、冲突消解、分支保护 | 240 分钟 |
 | 1 | [TDD 与 CI-CD 全链路实战](<1. TDD 与 CI-CD 全链路实战/instruction.md>) | 本地开发环境、Gitee 仓库、CI/CD 配置、测试驱动开发与实验总结 | 240 分钟 |
 | 2 | [传统 SaaS 到 AI Agent (MCP) 全景实战](<2. 传统 SaaS 到 AI Agent (MCP) 全景实战/instruction.md>) | Ollama、Qwen3.6、本地模型调用、MCP 风格工具抽象、Gradio 交互界面 | 240 分钟 |
-| 3 | [LLMOps 工业实战：从模型部署到可观测性治理](<3. LLMOps 工业实战：从模型部署到可观测性治理/instruction.md>) | 本地模型部署、A/B 测试、提示词注入、MCP 工具调用、护栏评估、可观测性治理 | 300 分钟 |
+| 3 | [本地 RAG 与知识增强问答：从资料检索到资料外拒答](<3. 本地 RAG 与知识增强问答：从资料检索到资料外拒答/instruction.md>) | 原神主题资料库、ChromaDB 工业向量库、Qwen 真实模型接入、引用来源、权限过滤、多文档综合、过期识别与冲突提示 | 320 分钟 |
 | 4 | [AgentOps 工业实战：多模型智能体网关部署](<4. AgentOps工业实战：多模型智能体网关部署/instruction.md>) | OpenClaw、云端与本地智能体接入、飞书通道、Router 路由、Skill/MCP 与配置落盘 | 240 分钟 |
-| 5 | [编辑中：提示词工程验证、EDD 与 AI 系统安全伦理](<%3C编辑中%3E5. 提示词工程验证与评估/instruction.md>) | 提示词样本集、版本管理、Evaluator、批量评估、注入攻击测试、敏感信息脱敏、错误分析与伦理反思 | 300 分钟 |
-| 6 | [编辑中：Harness 工程与 Agent 安全护栏](<%3C编辑中%3E6. Harness工程与Agent安全护栏/instruction.md>) | 工具白名单、路径边界、参数校验、失败反馈、审计日志、安全 Skill 设计 | 240 分钟 |
+| 5 | [提示词工程验证、EDD 与 AI 系统安全伦理](<5. 提示词工程验证与评估/instruction.md>) | 提示词样本集、版本管理、Evaluator、批量评估、注入攻击测试、敏感信息脱敏、错误分析与伦理反思 | 300 分钟 |
+| 6 | [Harness 工程与 Agent 安全护栏](<6. Harness工程与Agent安全护栏/instruction.md>) | Skill 能力说明、工具白名单、路径边界、参数校验、失败反馈、审计日志与安全测试 | 240 分钟 |
 | 7 | [编辑中：轻量级异步并发与 Token 成本控制](<%3C编辑中%3E7. 轻量级异步并发与Token成本控制/instruction.md>) | asyncio 并发、超时重试、Token 估算、成本统计、限流器与压测 | 240 分钟 |
-| 8 | [编辑中：本地 RAG 与长期记忆系统](<%3C编辑中%3E8. 本地RAG与长期记忆系统/instruction.md>) | 文档切分、简化向量检索、Top-K 召回、上下文拼接、资料外拒答 | 240 分钟 |
+| 8 | 编辑中：TBD | 预留后续实验主题位置 | 待定 |
 | 9 | [编辑中：多 Agent 状态机协作与工作流编排](<%3C编辑中%3E9. 多Agent状态机协作与工作流编排/instruction.md>) | 程序员/审查员/测试员 Agent、状态机路由、有限重试、流转日志 | 240 分钟 |
 | 10 | [编辑中：AI 应用 API 化与轻量级全栈交付](<%3C编辑中%3E10. AI应用API化与轻量级全栈交付/instruction.md>) | FastAPI、REST 接口、Token 鉴权、前端调用、Skill/API 契约、Docker 本地交付 | 240 分钟 |
-| 11 | [编辑中：EDD 内容已并入实验 5](<%3C编辑中%3E5. 提示词工程验证与评估/instruction.md>) | 原实验 11 的评估驱动开发、安全攻击、敏感信息脱敏和伦理反思已整合到实验 5 | 已并入 |
+| 11 | 编辑中：TBD | 预留后续实验主题位置 | 待定 |
 
 ## 文件约定
 
@@ -101,9 +95,10 @@
 - Git、IDEA、VS Code、Gitee 或 GitHub。
 - Python 3.10+ 或 Python 3.11，`pip` 与虚拟环境。
 - Ollama 与 Qwen 系列本地模型。
-- Gradio、MCP SDK、OpenAI 兼容接口客户端。
+- ChromaDB、本地 RAG 脚本与轻量级评估脚本。
+- Gradio、MCP SDK、OpenAI 兼容接口客户端或平台 SDK。
 - OpenClaw、飞书开放平台、火山引擎豆包相关配置。
-- FastAPI、Uvicorn、Docker、`asyncio`、本地 RAG 与轻量级评估脚本。
+- FastAPI、Uvicorn、Docker、`asyncio`、限流与压测脚本。
 
 具体版本、安装方式和验证命令以各主题 `instruction.md` 中的要求为准。
 
