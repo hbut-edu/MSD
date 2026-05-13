@@ -186,6 +186,30 @@ pip install sentence-transformers numpy chromadb
 | ChromaDB | 多文档语料 | `index/chroma_db/` | `chroma_records` 等于写入片段数 |
 | 本地 Qwen | 治理后的上下文 | 自然语言回答和引用 | 回答包含引用编号，不越过资料范围 |
 
+### 5. 代码身份标识
+
+本实验会逐步创建多份 Python 文件。为了让运行结果和代码来源能够对应到同学本人，开始编写业务代码前，先在实验根目录创建 `student_info.py`。它与后续的 `chunker.py`、`main.py`、`run_chroma_rag.py` 等文件处于同一级目录，不放入 `docs/`、`index/` 或 `outputs/`。
+
+创建 `student_info.py`，把占位学号替换为本人真实学号：
+
+```python
+# student_info.py
+# 将下面的占位符替换为本人真实学号，并保持与实验报告封面一致。
+STUDENT_ID = "2024xxxx"
+
+
+def print_student_id() -> None:
+    """在运行输出中打印学号，便于确认当前代码来自本人实验目录。"""
+    print(f"student_id={STUDENT_ID}")
+```
+
+后续代码按下面规则使用学号标识：
+
+1. 所有入口脚本顶部加入 `from student_info import print_student_id`，并在第一行实验输出前调用 `print_student_id()`。
+2. 入口脚本包括 `build_chunks.py`、`run_retrieve.py`、`main.py`、`eval_retrieval.py`、`eval_refusal.py`、`run_vector_search.py`、`run_governed_rag.py`、`run_chroma_rag.py`、`run_real_llm_rag.py`、`run_freshness_conflict.py`。
+3. 底层模块如 `chunker.py`、`simple_vector.py`、`retriever.py`、`rag_answer.py`、`vector_db.py` 不需要每次打印学号，但建议在文件顶部保留 `# 学号：2024xxxx` 注释，或从 `student_info.py` 导入 `STUDENT_ID`。
+4. 运行 `python main.py` 或任一 `run_*.py` 脚本时，终端第一行应能看到类似 `student_id=2024xxxx` 的输出。
+
 ## 第一阶段：资料切分
 
 ### 目标
@@ -225,7 +249,9 @@ import json
 from pathlib import Path
 
 from chunker import load_text, split_by_lines
+from student_info import print_student_id
 
+print_student_id()
 text = load_text("docs/genshin_notes.txt")
 chunks = split_by_lines(text)
 Path("index").mkdir(exist_ok=True)
@@ -384,6 +410,7 @@ def answer_with_context(question: str) -> dict:
 
 ```python
 from rag_answer import answer_with_context
+from student_info import print_student_id
 
 QUESTIONS = [
     "原神玩家扮演谁？",
@@ -392,6 +419,7 @@ QUESTIONS = [
     "今天食堂有什么菜？",
 ]
 
+print_student_id()
 for question in QUESTIONS:
     print("=" * 80)
     print("Q:", question)
