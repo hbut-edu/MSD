@@ -1,4 +1,4 @@
-# 《现代软件开发技术》上机实验手册：传统 SaaS 到 AI Agent (MCP) 全景实战
+# 2. 传统 SaaS 到 AI Agent (MCP) 全景实战 - 实验手册
 
 ## 实验主题
 
