@@ -96,3 +96,6 @@ out/
 *.ipr
 .project
 .classpath
+
+# 课程中间材料
+24级 中间材料/

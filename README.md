@@ -63,7 +63,7 @@
 | 1 | [TDD 与 CI-CD 全链路实战](<1. TDD 与 CI-CD 全链路实战/instruction.md>) | 本地开发环境、Gitee 仓库、CI/CD 配置、测试驱动开发与实验总结 | 240 分钟 |
 | 2 | [传统 SaaS 到 AI Agent (MCP) 全景实战](<2. 传统 SaaS 到 AI Agent (MCP) 全景实战/instruction.md>) | Ollama、Qwen3.6、本地模型调用、MCP 风格工具抽象、Gradio 交互界面 | 240 分钟 |
 | 3 | [本地 RAG 与知识增强问答：从资料检索到资料外拒答](<3. 本地 RAG 与知识增强问答：从资料检索到资料外拒答/instruction.md>) | 原神主题资料库、ChromaDB 工业向量库、Qwen 真实模型接入、引用来源、权限过滤、多文档综合、过期识别与冲突提示 | 320 分钟 |
-| 4 | [AgentOps 工业实战：多模型智能体网关部署](<4. AgentOps工业实战：多模型智能体网关部署/instruction.md>) | OpenClaw、云端与本地智能体接入、飞书通道、Router 路由、Skill/MCP 与配置落盘 | 240 分钟 |
+| 4 | [AgentOps 工业实战：多模型智能体网关部署](<4. AgentOps工业实战：多模型智能体网关部署/instruction.md>) | OpenClaw 与 Hermes 双框架双 Agent 实践、DeepSeek v4 pro 与 Ollama qwen3.6 接入、四个飞书机器人从零配置、四个角色 Skill、Router/Binding 路由、Gateway/MCP 入口观察与优缺点对比 | 240 分钟 |
 | 5 | [Skill 工程实战：智能体能力扩展与工作流沉淀](<5. Skill工程实战：智能体能力扩展与工作流沉淀/instruction.md>) | Skill 概念、组成部分、原神兑换码公开来源抓取、有效期抽取、Agent 挂载、工作流反推 Skill、有无 Skill 对比 | 240 分钟 |
 | 6 | [提示词工程验证、EDD 与 AI 系统安全伦理](<6. 提示词工程验证与评估/instruction.md>) | 提示词样本集、版本管理、Evaluator、批量评估、注入攻击测试、敏感信息脱敏、错误分析与伦理反思 | 300 分钟 |
 | 7 | [Harness 工程与 Agent 安全护栏](<7. Harness工程与Agent安全护栏/instruction.md>) | Skill 能力说明、工具白名单、路径边界、参数校验、失败反馈、审计日志与安全测试 | 240 分钟 |
@@ -98,7 +98,7 @@
 - Ollama 与 Qwen 系列本地模型。
 - ChromaDB、本地 RAG 脚本与轻量级评估脚本。
 - Gradio、MCP SDK、OpenAI 兼容接口客户端或平台 SDK。
-- OpenClaw、飞书开放平台、火山引擎豆包相关配置。
+- OpenClaw、Hermes Agent、飞书开放平台、DeepSeek 或课堂指定云端模型相关配置。
 - Skill 目录、`SKILL.md`、Agent 能力挂载与工作流沉淀材料。
 - FastAPI、Uvicorn、Docker、`asyncio`、限流与压测脚本。
 
